@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-noir: #050505;
-  --color-or: #d4af37;
-  --color-creme: #f7f2e8;
+  --color-noir: #1a1a1a;
+  --color-or: #c9a84c;
+  --color-creme: #f5f5f3;
 }
 
 @layer base {
@@ -12,10 +12,12 @@
   }
 
   body {
-    background: var(--color-noir);
-    color: white;
     margin: 0;
+    background: #ffffff;
+    color: #1a1a1a;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.8;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -25,6 +27,9 @@
   h3,
   h4 {
     font-family: Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
   * {
@@ -32,32 +37,156 @@
   }
 
   a {
+    color: inherit;
     text-decoration: none;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-full px-5 py-3 font-semibold text-black transition hover:scale-[1.02];
-    background-color: var(--color-or);
+    @apply inline-flex items-center justify-center bg-[#1A1A1A] px-8 py-3.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-white transition-all duration-300 ease-in-out hover:bg-[#333333] disabled:cursor-not-allowed disabled:opacity-60;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.12) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
+
+  .btn-primary:hover::after {
+    transform: translateX(100%);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-5 py-3 font-semibold text-white transition hover:text-[var(--color-or)];
+    @apply inline-flex items-center justify-center border border-[#1A1A1A] bg-transparent px-8 py-[13px] text-[13px] font-semibold uppercase tracking-[0.15em] text-[#1A1A1A] transition-all duration-300 ease-in-out hover:bg-[#1A1A1A] hover:text-white;
   }
 
   .card-surface {
-    @apply rounded-3xl border border-white/10 bg-white/5 backdrop-blur;
+    @apply border border-[#E8E8E8] bg-white;
+    box-shadow: none;
+    border-radius: 0;
   }
 
   .input-base {
-    @apply w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition placeholder:text-white/40 focus:border-[var(--color-or)];
+    @apply w-full border border-[#E8E8E8] bg-white px-4 py-3 text-[#1A1A1A] outline-none transition-all duration-300 ease-in-out placeholder:text-[#6B6B6B] focus:border-[#1A1A1A];
+    border-radius: 0;
   }
 
   .section-title {
-    @apply text-3xl font-bold tracking-tight text-white sm:text-4xl;
+    @apply text-center font-serif text-[28px] font-normal uppercase tracking-[0.1em] text-[#1A1A1A];
+  }
+
+  .site-public {
+    background: #ffffff;
+    color: #1a1a1a;
+  }
+
+  .site-public p {
+    color: inherit;
+  }
+
+  /* ── ADMIN AREA (Matches Client UI) ── */
+  .admin-area .btn-primary {
+    /* Slightly more "gold" for admin primary buttons to distinguish them but keep the style */
+    @apply bg-[#C9A84C] text-white hover:bg-[#b8963d];
+  }
+
+  .admin-area .btn-secondary {
+    @apply border-[#1A1A1A] bg-transparent text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white;
+  }
+
+  .admin-area .card-surface {
+    @apply border-[#E8E8E8] bg-white text-[#1A1A1A];
+    border-radius: 0; /* Match client card style */
+  }
+
+  .admin-area .input-base {
+    @apply border-[#E8E8E8] bg-white text-[#1A1A1A] placeholder:text-[#6B6B6B] focus:border-[#C9A84C];
+    border-radius: 0;
+  }
+
+  .admin-area .section-title {
+    @apply text-left text-[#1A1A1A];
+  }
+
+  /* Admin stat card - light version */
+  .admin-area .stat-card {
+    @apply border border-[#E8E8E8] bg-[#F5F5F3] text-[#1A1A1A];
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .admin-area .stat-card:hover {
+    transform: translateY(-4px);
+    @apply shadow-lg;
   }
 }
+
+/* ── ANIMATIONS ── */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes pageEntrance {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-marquee { animation: marquee 24s linear infinite; }
+.animate-fade-up { animation: fadeUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in { animation: fadeIn 0.5s ease both; }
+.animate-scale-in { animation: scaleIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-slide-left { animation: slideInLeft 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-slide-right { animation: slideInRight 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-page { animation: pageEntrance 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-150 { animation-delay: 0.15s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+.carte-produit-anim { animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.badge-anim { animation: scaleIn 0.4s ease 0.2s both; }
 
 #root {
   min-height: 100vh;

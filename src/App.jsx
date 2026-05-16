@@ -8,6 +8,7 @@ import Produit from "./pages/Produit";
 import Panier from "./pages/Panier";
 import Commande from "./pages/Commande";
 import Confirmation from "./pages/Confirmation";
+import Favoris from "./pages/Favoris";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import ProduitsAdmin from "./pages/admin/Produits";
@@ -17,9 +18,9 @@ import CommandesAdmin from "./pages/admin/Commandes";
 
 function ClientLayout() {
   return (
-    <div className="min-h-screen bg-noir text-white">
+    <div className="site-public min-h-screen bg-white text-[#1A1A1A]">
       <Navbar />
-      <main className="mx-auto min-h-[calc(100vh-180px)] max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="min-h-[calc(100vh-180px)]">
         <Outlet />
       </main>
       <Footer />
@@ -29,7 +30,7 @@ function ClientLayout() {
 
 function AdminLayout() {
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+    <div className="admin-area min-h-screen bg-white text-[#1A1A1A]">
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <Outlet />
       </main>
@@ -47,6 +48,7 @@ function RouterView() {
           <Route path="/" element={<Accueil />} />
           <Route path="/catalogue" element={<Catalogue />} />
           <Route path="/produit/:id" element={<Produit />} />
+          <Route path="/favoris" element={<Favoris />} />
           <Route path="/panier" element={<Panier />} />
           <Route path="/commande" element={<Commande />} />
           <Route path="/confirmation" element={<Confirmation />} />

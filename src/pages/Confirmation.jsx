@@ -5,28 +5,28 @@ export default function Confirmation() {
   const orderId = location.state?.orderId || sessionStorage.getItem("magsin-last-order-id");
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <section className="card-surface rounded-[2rem] p-8 text-center sm:p-12">
-        <p className="text-sm uppercase tracking-[0.35em] text-or">Merci</p>
-        <h1 className="mt-4 text-4xl font-bold">Votre commande a bien été enregistrée</h1>
-        <p className="mt-4 text-white/70">
-          Nous vous contacterons dans 24h pour confirmer les détails de livraison.
-        </p>
+    <div className="mx-auto max-w-3xl px-5 py-20 text-center animate-page">
+      <p className="text-[11px] uppercase tracking-[0.2em] text-[#6B6B6B] animate-fade-up">Confirmation</p>
+      <h1 className="mt-5 font-serif text-3xl font-normal uppercase tracking-[0.1em] text-[#1A1A1A] animate-fade-up delay-150">
+        Votre commande est confirmee
+      </h1>
+      <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[#6B6B6B] animate-fade-up delay-300">
+        Nous vous contacterons sous 24h pour confirmer les details de livraison.
+      </p>
 
-        <div className="mx-auto mt-8 max-w-md rounded-3xl border border-or/30 bg-or/10 p-5">
-          <p className="text-sm text-white/60">Numéro de commande</p>
-          <p className="mt-2 text-2xl font-bold text-or">{orderId || "En cours de génération"}</p>
-        </div>
+      <div className="mx-auto mt-10 max-w-md bg-[#F5F5F3] p-8 animate-scale-in delay-400">
+        <p className="text-[11px] uppercase tracking-[0.18em] text-[#6B6B6B]">Numero de commande</p>
+        <p className="mt-3 text-xl text-[#1A1A1A]">{orderId || "En cours de generation"}</p>
+      </div>
 
-        <div className="mt-8 flex flex-wrap justify-center gap-4">
-          <Link to="/catalogue" className="btn-primary">
-            Continuer vos achats
-          </Link>
-          <Link to="/" className="btn-secondary">
-            Retour à l'accueil
-          </Link>
-        </div>
-      </section>
+      <div className="mt-10 flex flex-wrap justify-center gap-4 animate-fade-up delay-500">
+        <Link to="/catalogue" className="btn-primary">
+          Continuer vos achats
+        </Link>
+        <Link to="/" className="btn-secondary">
+          Retour accueil
+        </Link>
+      </div>
     </div>
   );
 }

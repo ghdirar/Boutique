@@ -51,7 +51,7 @@ export default function ProduitsAdmin() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-page">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.35em] text-or">Administration</p>
@@ -69,9 +69,9 @@ export default function ProduitsAdmin() {
 
       {error && <p className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-red-200">{error}</p>}
 
-      <div className="overflow-x-auto rounded-[2rem] border border-white/10 bg-white/5">
-        <table className="min-w-full divide-y divide-white/10 text-left text-sm">
-          <thead className="bg-white/5 text-white/60">
+      <div className="overflow-x-auto border border-[#E8E8E8] bg-white">
+        <table className="min-w-full divide-y divide-[#E8E8E8] text-left text-sm">
+          <thead className="bg-[#F5F5F3] text-[#6B6B6B]">
             <tr>
               <th className="px-4 py-4">Image</th>
               <th className="px-4 py-4">Nom</th>
@@ -81,11 +81,11 @@ export default function ProduitsAdmin() {
               <th className="px-4 py-4">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/10">
+          <tbody className="divide-y divide-[#E8E8E8]">
             {produits.map((produit) => (
               <tr key={produit.id}>
                 <td className="px-4 py-4">
-                  <img src={produit.imageUrl} alt={produit.nom} className="h-16 w-16 rounded-2xl object-cover" />
+                  <img src={produit.couleurs?.[0]?.imageUrl || produit.imageUrl} alt={produit.nom} className="h-16 w-16 object-cover" />
                 </td>
                 <td className="px-4 py-4 font-semibold">{produit.nom}</td>
                 <td className="px-4 py-4 text-or">{formatPrice(produit.prix)}</td>
@@ -96,7 +96,7 @@ export default function ProduitsAdmin() {
                     <Link to={`/admin/produits/modifier/${produit.id}`} className="btn-secondary !px-4 !py-2">
                       Modifier
                     </Link>
-                    <button type="button" onClick={() => handleDelete(produit)} className="rounded-full bg-red-500/20 px-4 py-2 font-semibold text-red-200">
+                    <button type="button" onClick={() => handleDelete(produit)} className="bg-red-50 px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-red-600 border border-red-100 hover:bg-red-600 hover:text-white transition-colors">
                       Supprimer
                     </button>
                   </div>

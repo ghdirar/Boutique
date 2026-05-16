@@ -5,10 +5,10 @@ import Spinner from "../../components/Spinner";
 import { db } from "../../firebase";
 
 const statusColors = {
-  "en attente": "bg-yellow-500/15 text-yellow-200",
-  "confirmée": "bg-sky-500/15 text-sky-200",
-  "expédiée": "bg-indigo-500/15 text-indigo-200",
-  "livrée": "bg-emerald-500/15 text-emerald-200",
+  "en attente": "bg-yellow-100 text-yellow-700",
+  "confirmée": "bg-sky-100 text-sky-700",
+  "expédiée": "bg-indigo-100 text-indigo-700",
+  "livrée": "bg-emerald-100 text-emerald-700",
 };
 
 const statuses = ["en attente", "confirmée", "expédiée", "livrée"];
@@ -55,7 +55,7 @@ export default function CommandesAdmin() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-page">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.35em] text-or">Administration</p>
@@ -70,15 +70,16 @@ export default function CommandesAdmin() {
 
       <div className="space-y-5">
         {commandes.map((commande) => (
-          <article key={commande.id} className="card-surface rounded-[2rem] p-6">
+          <article key={commande.id} className="card-surface p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-2">
                 <h2 className="text-2xl font-semibold">{commande.client?.nom}</h2>
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-[#6B6B6B]">
                   {commande.client?.telephone} • {commande.client?.email}
                 </p>
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-[#6B6B6B]">
                   {commande.client?.adresse} • {commande.client?.wilaya}
+                  {commande.client?.commune ? ` — ${commande.client.commune}` : ""}
                 </p>
               </div>
 
@@ -93,7 +94,7 @@ export default function CommandesAdmin() {
                   className="input-base min-w-[180px]"
                 >
                   {statuses.map((status) => (
-                    <option key={status} value={status} className="bg-black">
+                    <option key={status} value={status}>
                       {status}
                     </option>
                   ))}
@@ -103,13 +104,13 @@ export default function CommandesAdmin() {
 
             <div className="mt-6 grid gap-4">
               {commande.articles?.map((article, index) => (
-                <div key={`${commande.id}-${index}`} className="rounded-3xl border border-white/10 bg-black/30 p-4">
+                <div key={`${commande.id}-${index}`} className="border border-[#E8E8E8] bg-[#F5F5F3] p-4">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                     <img src={article.imageUrl} alt={article.nom} className="h-20 w-20 rounded-2xl object-cover" />
                     <div className="flex-1">
                       <p className="font-semibold">{article.nom}</p>
-                      <p className="text-sm text-white/60">
-                        Taille : {article.taille} • Couleur : {article.couleur} • Quantité : {article.quantite}
+                      <p className="text-sm text-[#6B6B6B]">
+                        Couleur : {article.couleur} • Quantité : {article.quantite}
                       </p>
                     </div>
                     <p className="font-semibold text-or">{formatPrice(article.prix * article.quantite)}</p>
@@ -118,8 +119,8 @@ export default function CommandesAdmin() {
               ))}
             </div>
 
-            <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
-              <span className="text-sm text-white/60">Commande #{commande.id}</span>
+            <div className="mt-6 flex items-center justify-between border-t border-[#E8E8E8] pt-4">
+              <span className="text-sm text-[#6B6B6B]">Commande #{commande.id}</span>
               <span className="text-lg font-bold text-or">{formatPrice(commande.total)}</span>
             </div>
           </article>
