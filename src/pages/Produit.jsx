@@ -39,8 +39,12 @@ export default function Produit() {
         const data = { id: snapshot.id, ...snapshot.data() };
         setProduit(data);
         setSelectedSize(data.tailles?.[0] || "");
-        setSelectedColor(data.couleurs?.[0]?.nom || data.couleurs?.[0] || "");
-        setMainImage(data.couleurs?.[0]?.imageUrl || data.images?.[0] || data.imageUrl || "");
+        
+        const initialColor = data.couleurs?.[0]?.nom || data.couleurs?.[0] || "";
+        setSelectedColor(initialColor);
+        
+        const initialImage = data.couleurs?.[0]?.images?.[0]?.imageUrl || data.couleurs?.[0]?.imageUrl || data.images?.[0] || data.imageUrl || "";
+        setMainImage(initialImage);
       } catch (fetchError) {
         setError("Impossible de charger ce produit.");
       } finally {
@@ -82,7 +86,18 @@ export default function Produit() {
     );
   }
 
-  const images = produit.images?.length ? produit.images : [produit.imageUrl].filter(Boolean);
+  const activeColorObj = produit.couleurs?.find(
+    (c) => (typeof c === "object" ? c.nom : c) === selectedColor
+  );
+
+  const images = activeColorObj?.images?.length
+    ? activeColorObj.images.map((img) => img.imageUrl)
+    : activeColorObj?.imageUrl
+    ? [activeColorObj.imageUrl]
+    : produit.images?.length
+    ? produit.images
+    : [produit.imageUrl].filter(Boolean);
+
   const similaires = produits.filter((item) => item.id !== produit.id).slice(0, 4);
 
   return (
@@ -92,15 +107,15 @@ export default function Produit() {
           <div className="overflow-hidden bg-[#F5F5F3]">
             <img src={mainImage || produit.imageUrl} alt={produit.nom} className="aspect-[4/5] w-full object-cover" />
           </div>
-          <div className="mt-4 flex gap-3">
+          <div className="mt-4 flex gap-3 flex-wrap">
             {images.map((image) => (
               <button
                 key={image}
                 type="button"
                 onClick={() => setMainImage(image)}
-                className={`h-[90px] w-[70px] border ${mainImage === image ? "border-[#1A1A1A]" : "border-[#E8E8E8]"}`}
+                className={`h-[90px] w-[70px] border transition-all duration-300 ${mainImage === image ? "border-[#1A1A1A] opacity-100" : "border-[#E8E8E8] opacity-75 hover:opacity-100"}`}
               >
-                <img src={image} alt={produit.nom} className="h-full w-full object-cover" />
+                <img src={image} alt={produit.nom} className="h-full w-full object-cover animate-fade-in" />
               </button>
             ))}
           </div>
@@ -126,16 +141,17 @@ export default function Produit() {
                 const hex = typeof couleur === "string" ? couleur : couleur.hex;
                 return (
                   <button
-                  key={name}
-                  type="button"
-                  title={name}
-                  onClick={() => {
-                    setSelectedColor(name);
-                    if (couleur.imageUrl) {
-                      setMainImage(couleur.imageUrl);
-                    }
-                  }}
-                    className={`h-7 w-7 rounded-full border-2 ${selectedColor === name ? "border-[#1A1A1A]" : "border-[#E8E8E8]"}`}
+                    key={name}
+                    type="button"
+                    title={name}
+                    onClick={() => {
+                      setSelectedColor(name);
+                      const firstImg = couleur.images?.[0]?.imageUrl || couleur.imageUrl;
+                      if (firstImg) {
+                        setMainImage(firstImg);
+                      }
+                    }}
+                    className={`h-7 w-7 rounded-full border-2 transition-all duration-300 ${selectedColor === name ? "border-[#1A1A1A] scale-110" : "border-[#E8E8E8] hover:scale-105"}`}
                     style={{ backgroundColor: hex || name }}
                   />
                 );
@@ -184,7 +200,7 @@ export default function Produit() {
             {[
               ["description", "Description", produit.description || "Un essentiel de maroquinerie aux finitions soignees."],
               ["matieres", "Matieres et entretien", "Nettoyer avec un chiffon doux. Eviter l'exposition prolongee a l'humidite."],
-              ["livraison", "Livraison & retours", "Livraison en Algerie. Retours possibles sous 14 jours."],
+              ["livraison", "Livraison", "Livraison partout en Algérie. Paiement à la réception."],
             ].map(([key, title, content]) => (
               <div key={key} className="border-b border-[#E8E8E8] py-5">
                 <button type="button" onClick={() => setOpenAccordion(openAccordion === key ? "" : key)} className="flex w-full items-center justify-between text-[13px] font-semibold uppercase tracking-[0.12em]">

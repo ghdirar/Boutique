@@ -6,6 +6,7 @@ import "./index.css";
 import { AuthProvider } from "./context/AuthContext";
 import { PanierProvider } from "./context/PanierContext";
 import { FavorisProvider } from "./context/FavorisContext";
+import { ToastProvider } from "./context/ToastContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -13,10 +14,13 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <AuthProvider>
         <PanierProvider>
           <FavorisProvider>
-            <App />
+            <ToastProvider>
+              <App />
+            </ToastProvider>
           </FavorisProvider>
         </PanierProvider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );
+
