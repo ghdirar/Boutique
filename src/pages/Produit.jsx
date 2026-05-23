@@ -4,17 +4,24 @@ import { Link, useParams } from "react-router-dom";
 import CarteProduit from "../components/CarteProduit";
 import Spinner from "../components/Spinner";
 import { usePanier } from "../context/PanierContext";
+import { useFavoris } from "../context/FavorisContext";
+import { useToast } from "../context/ToastContext";
+import { useLanguage } from "../context/LanguageContext";
 import { db } from "../firebase";
 import useProduits from "../hooks/useProduits";
 
-function formatPrice(value) {
-  return `${Number(value).toLocaleString("fr-FR")} DA`;
+function formatPrice(value, lang) {
+  return `${Number(value).toLocaleString("fr-FR")} ${lang === "ar" ? "د.ج" : "DA"}`;
 }
 
 export default function Produit() {
   const { id } = useParams();
   const { ajouterAuPanier } = usePanier();
+  const { isFavori, toggleFavori } = useFavoris();
+  const { addToast } = useToast();
+  const { t, lang } = useLanguage();
   const { produits } = useProduits();
+  
   const [produit, setProduit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -32,7 +39,7 @@ export default function Produit() {
         const snapshot = await getDoc(doc(db, "produits", id));
 
         if (!snapshot.exists()) {
-          setError("Produit introuvable.");
+          setError(lang === "fr" ? "Produit introuvable." : "المنتج غير موجود.");
           return;
         }
 
@@ -46,19 +53,17 @@ export default function Produit() {
         const initialImage = data.couleurs?.[0]?.images?.[0]?.imageUrl || data.couleurs?.[0]?.imageUrl || data.images?.[0] || data.imageUrl || "";
         setMainImage(initialImage);
       } catch (fetchError) {
-        setError("Impossible de charger ce produit.");
+        setError(lang === "fr" ? "Impossible de charger ce produit." : "فشل تحميل تفاصيل هذا المنتج.");
       } finally {
         setLoading(false);
       }
     }
 
     fetchProduit();
-  }, [id]);
+  }, [id, lang]);
 
   const handleAddToCart = () => {
-    if (!produit) {
-      return;
-    }
+    if (!produit) return;
 
     ajouterAuPanier({
       produitId: produit.id,
@@ -71,8 +76,19 @@ export default function Produit() {
     });
   };
 
+  const isProdFavori = produit ? isFavori(produit.id) : false;
+
+  const handleToggleFavori = () => {
+    if (!produit) return;
+    toggleFavori(produit.id);
+    const msg = isProdFavori 
+      ? (lang === "fr" ? `${produit.nom} retiré des favoris` : `تم حذف ${produit.nom} من المفضلة`)
+      : (lang === "fr" ? `${produit.nom} ajouté aux favoris` : `تم إضافة ${produit.nom} للمفضلة`);
+    addToast(msg, "💛");
+  };
+
   if (loading) {
-    return <Spinner label="Chargement du produit..." />;
+    return <Spinner label={t("chargement")} />;
   }
 
   if (error || !produit) {
@@ -80,7 +96,7 @@ export default function Produit() {
       <div className="mx-auto max-w-3xl px-5 py-20 text-center">
         <p className="mb-6 text-red-700">{error || "Produit indisponible."}</p>
         <Link to="/catalogue" className="btn-secondary">
-          Retour au catalogue
+          {t("voir_catalogue")}
         </Link>
       </div>
     );
@@ -117,7 +133,7 @@ export default function Produit() {
               />
             ))}
             
-            {/* Elegant Navigation Arrows (Fades in on Hover) */}
+            {/* Elegant Navigation Arrows */}
             {images.length > 1 && (
               <>
                 <button
@@ -171,20 +187,24 @@ export default function Produit() {
           </div>
         </section>
 
-        <section className="lg:pl-[60px] animate-slide-right">
-          <p className="text-[12px] text-[#6B6B6B]">Accueil &gt; Femme &gt; Sacs &gt; {produit.nom}</p>
+        <section className={`animate-slide-right ${lang === "fr" ? "lg:pl-[60px]" : "lg:pr-[60px]"}`}>
+          <p className="text-[12px] text-[#6B6B6B]">
+            {lang === "fr" 
+              ? <>Accueil &gt; Femme &gt; Sacs &gt; {produit.nom}</> 
+              : <>الرئيسية &gt; نساء &gt; حقائب &gt; {produit.nom}</>}
+          </p>
           <p className="mt-8 text-[11px] uppercase tracking-[0.18em] text-[#6B6B6B]">
             {produit.collection || produit.categorie || "Collection"}
           </p>
           <h1 className="mt-4 font-serif text-[28px] font-normal uppercase tracking-[0.1em] text-[#1A1A1A]">
             {produit.nom}
           </h1>
-          <p className="mt-4 text-xl text-[#1A1A1A]">{formatPrice(produit.prix)}</p>
+          <p className="mt-4 text-xl text-[#1A1A1A]">{formatPrice(produit.prix, lang)}</p>
 
           <div className="my-6 border-t border-[#E8E8E8]" />
 
           <div>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-[#6B6B6B]">Couleur</p>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[#6B6B6B]">{t("couleur")}</p>
             <div className="mt-4 flex gap-3">
               {produit.couleurs?.map((couleur) => {
                 const name = typeof couleur === "string" ? couleur : couleur.nom;
@@ -201,7 +221,7 @@ export default function Produit() {
                         setMainImage(firstImg);
                       }
                     }}
-                    className={`h-7 w-7 rounded-full border-2 transition-all duration-300 ${selectedColor === name ? "border-[#1A1A1A] scale-110" : "border-[#E8E8E8] hover:scale-105"}`}
+                    className={`h-7 w-7 rounded-full border-2 transition-all duration-300 cursor-pointer ${selectedColor === name ? "border-[#1A1A1A] scale-110 shadow-sm" : "border-[#E8E8E8] hover:scale-105"}`}
                     style={{ backgroundColor: hex || name }}
                   />
                 );
@@ -211,15 +231,15 @@ export default function Produit() {
 
           {produit.tailles?.length > 0 && (
             <div className="mt-8">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-[#6B6B6B]">Taille</p>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-[#6B6B6B]">{t("taille")}</p>
               <div className="mt-4 flex gap-3">
                 {produit.tailles.map((taille) => (
                   <button
                     key={taille}
                     type="button"
                     onClick={() => setSelectedSize(taille)}
-                    className={`grid h-11 w-11 place-items-center border text-sm ${
-                      selectedSize === taille ? "border-[#1A1A1A] bg-[#1A1A1A] text-white" : "border-[#E8E8E8] text-[#1A1A1A]"
+                    className={`grid h-11 w-11 place-items-center border text-sm transition-all cursor-pointer ${
+                      selectedSize === taille ? "border-[#1A1A1A] bg-[#1A1A1A] text-white" : "border-[#E8E8E8] text-[#1A1A1A] hover:border-black"
                     }`}
                   >
                     {taille}
@@ -229,35 +249,39 @@ export default function Produit() {
             </div>
           )}
 
-          <div className="mt-8 flex items-center border border-[#E8E8E8]">
-            <button type="button" className="px-4 py-2" onClick={() => setQuantite((current) => Math.max(1, current - 1))}>
-              -
-            </button>
-            <span className="min-w-10 text-center">{quantite}</span>
-            <button type="button" className="px-4 py-2" onClick={() => setQuantite((current) => current + 1)}>
-              +
-            </button>
+          <div className="mt-8">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[#6B6B6B]">{t("quantite")}</p>
+            <div className="mt-4 flex items-center border border-[#E8E8E8] max-w-[120px] rounded-full overflow-hidden bg-[#f7f4ef]/50">
+              <button type="button" className="px-4 py-2 hover:bg-black/[0.03] transition font-bold cursor-pointer" onClick={() => setQuantite((current) => Math.max(1, current - 1))}>
+                -
+              </button>
+              <span className="min-w-10 text-center font-semibold text-sm">{quantite}</span>
+              <button type="button" className="px-4 py-2 hover:bg-black/[0.03] transition font-bold cursor-pointer" onClick={() => setQuantite((current) => current + 1)}>
+                +
+              </button>
+            </div>
           </div>
 
-          <button type="button" onClick={handleAddToCart} className="btn-primary mt-8 h-[54px] w-full">
-            Ajouter au panier
+          <button type="button" onClick={handleAddToCart} className="btn-primary mt-8 h-[54px] w-full cursor-pointer">
+            {t("ajouter_panier")}
           </button>
-          <button type="button" className="btn-secondary mt-3 w-full">
-            Ajouter aux favoris
+          
+          <button type="button" onClick={handleToggleFavori} className="btn-secondary mt-3 w-full cursor-pointer">
+            {isProdFavori ? (lang === "fr" ? "Retirer des favoris" : "حذف من المفضلة") : (lang === "fr" ? "Ajouter aux favoris" : "إضافة للمفضلة")}
           </button>
 
           <div className="mt-8">
             {[
-              ["description", "Description", produit.description || "Un essentiel de maroquinerie aux finitions soignees."],
-              ["matieres", "Matieres et entretien", "Nettoyer avec un chiffon doux. Eviter l'exposition prolongee a l'humidite."],
-              ["livraison", "Livraison", "Livraison partout en Algérie. Paiement à la réception."],
+              ["description", lang === "fr" ? "Description" : "الوصف", produit.description || (lang === "fr" ? "Un essentiel de maroquinerie aux finitions soignées." : "قطعة جلدية فاخرة وأساسية بتشطيبات يدوية متقنة.")],
+              ["matieres", lang === "fr" ? "Matières et entretien" : "الخامة والعناية", lang === "fr" ? "Nettoyer avec un chiffon doux. Éviter l'exposition prolongée à l'humidité." : "تُنظف بقطعة قماش ناعمة. يُرجى تجنب تعريضها للرطوبة لفترات طويلة."],
+              ["livraison", lang === "fr" ? "Livraison" : "الشحن والتوصيل", lang === "fr" ? "Livraison partout en Algérie. Paiement cash à la réception." : "التوصيل متوفر لكافة الولايات الجزائرية. الدفع نقدًا عند الاستلام."],
             ].map(([key, title, content]) => (
               <div key={key} className="border-b border-[#E8E8E8] py-5">
-                <button type="button" onClick={() => setOpenAccordion(openAccordion === key ? "" : key)} className="flex w-full items-center justify-between text-[13px] font-semibold uppercase tracking-[0.12em]">
-                  {title}
-                  <span>{openAccordion === key ? "-" : "+"}</span>
+                <button type="button" onClick={() => setOpenAccordion(openAccordion === key ? "" : key)} className="flex w-full items-center justify-between text-[13px] font-semibold uppercase tracking-[0.12em] cursor-pointer">
+                  <span>{title}</span>
+                  <span className="font-mono text-base">{openAccordion === key ? "−" : "+"}</span>
                 </button>
-                {openAccordion === key && <p className="mt-4 text-sm leading-7 text-[#6B6B6B]">{content}</p>}
+                {openAccordion === key && <p className="mt-4 text-sm leading-7 text-[#6B6B6B] animate-fade-in">{content}</p>}
               </div>
             ))}
           </div>
@@ -266,7 +290,7 @@ export default function Produit() {
 
       {similaires.length > 0 && (
         <section className="mx-auto max-w-7xl py-20">
-          <h2 className="section-title">Vous aimerez aussi</h2>
+          <h2 className="section-title text-center lg:text-left">{t("vous_aimerez_aussi")}</h2>
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {similaires.map((item) => (
               <CarteProduit key={item.id} produit={item} />

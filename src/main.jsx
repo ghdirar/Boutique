@@ -7,19 +7,22 @@ import { AuthProvider } from "./context/AuthContext";
 import { PanierProvider } from "./context/PanierContext";
 import { FavorisProvider } from "./context/FavorisContext";
 import { ToastProvider } from "./context/ToastContext";
+import { LanguageProvider } from "./context/LanguageContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <PanierProvider>
-          <FavorisProvider>
-            <ToastProvider>
-              <App />
-            </ToastProvider>
-          </FavorisProvider>
-        </PanierProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <PanierProvider>
+            <FavorisProvider>
+              <ToastProvider>
+                <App />
+              </ToastProvider>
+            </FavorisProvider>
+          </PanierProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );

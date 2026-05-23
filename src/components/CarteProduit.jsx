@@ -3,16 +3,25 @@ import { Link } from "react-router-dom";
 import { useFavoris } from "../context/FavorisContext";
 import { useToast } from "../context/ToastContext";
 import { usePanier } from "../context/PanierContext";
+import { useLanguage } from "../context/LanguageContext";
 
-function formatPrice(value) {
-  return `${Number(value).toLocaleString("fr-FR")} DA`;
+function formatPrice(value, lang) {
+  return `${Number(value).toLocaleString("fr-FR")} ${lang === "ar" ? "د.ج" : "DA"}`;
 }
 
 const fallbackSwatches = ["#efe3d2", "#1a1a1a", "#b58d73", "#6f765e"];
 
 export default function CarteProduit({ produit }) {
+  const { lang, t } = useLanguage();
+  const { isFavori, toggleFavori } = useFavoris();
+  const { ajouterAuPanier } = usePanier();
+  const { addToast } = useToast();
+
   const couleurs = Array.isArray(produit.couleurs) && produit.couleurs.length ? produit.couleurs : fallbackSwatches;
-  const badge = produit.badges?.[0] || "Nouveauté";
+  
+  // Clean default badge translations
+  const defaultBadgeText = lang === "fr" ? "Nouveauté" : "جديد";
+  const badge = produit.badges?.[0] || defaultBadgeText;
 
   const firstColorImage = couleurs.find((c) => typeof c === "object" && c.imageUrl)?.imageUrl;
   const defaultImage = firstColorImage || (Array.isArray(produit.images) ? produit.images[0] : null) || produit.imageUrl;
@@ -22,9 +31,6 @@ export default function CarteProduit({ produit }) {
     return typeof first === "object" ? first.nom : first;
   });
 
-  const { isFavori, toggleFavori } = useFavoris();
-  const { ajouterAuPanier } = usePanier();
-  const { addToast } = useToast();
   const favoriActive = isFavori(produit.id);
 
   // Get all unique images for this product, strictly prioritizing the selected color
@@ -112,10 +118,10 @@ export default function CarteProduit({ produit }) {
   const handleFavori = (e) => {
     e.preventDefault();
     toggleFavori(produit.id);
-    addToast(
-      favoriActive ? "Retiré des favoris" : "Ajouté aux favoris",
-      favoriActive ? "💔" : "❤️"
-    );
+    const msg = favoriActive 
+      ? (lang === "fr" ? `${produit.nom} retiré des favoris` : `تم حذف ${produit.nom} من المفضلة`)
+      : (lang === "fr" ? `${produit.nom} ajouté aux favoris` : `تم إضافة ${produit.nom} للمفضلة`);
+    addToast(msg, favoriActive ? "💔" : "💛");
   };
 
   const handleQuickAdd = (e) => {
@@ -128,7 +134,8 @@ export default function CarteProduit({ produit }) {
       couleur: activeColor,
       quantite: 1,
     });
-    addToast(`${produit.nom} ajouté au panier`, "🛍️");
+    const toastMsg = lang === "fr" ? `${produit.nom} ajouté au panier` : `تم إضافة ${produit.nom} للسلة`;
+    addToast(toastMsg, "🛍️");
   };
 
   return (
@@ -165,7 +172,7 @@ export default function CarteProduit({ produit }) {
               ? "bg-[#c9a84c] text-white opacity-100"
               : "bg-white/90 text-[#080808] sm:opacity-0 group-hover:opacity-100"
           }`}
-          aria-label="Ajouter aux favoris"
+          aria-label={lang === "fr" ? "Ajouter aux favoris" : "إضافة للمفضلة"}
         >
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill={favoriActive ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8">
             <path d="M20.8 5.6c-1.7-2-4.8-1.8-6.4.3L12 8.8 9.6 5.9C8 3.8 4.9 3.6 3.2 5.6c-1.9 2.2-1.5 5.6.7 7.5l8.1 7 8.1-7c2.2-1.9 2.6-5.3.7-7.5Z" />
@@ -173,20 +180,20 @@ export default function CarteProduit({ produit }) {
         </button>
 
         {/* Quick add overlay */}
-        <div className="absolute inset-x-0 bottom-0 translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0">
+        <div className="absolute inset-x-0 bottom-0 translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0 z-20">
           <div className="flex gap-2 p-3">
             <button
               type="button"
               onClick={handleQuickAdd}
-              className="flex-1 rounded-full bg-[#080808]/90 backdrop-blur-sm py-3 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-all duration-200 hover:bg-[#080808]"
+              className="flex-1 rounded-full bg-[#080808]/90 backdrop-blur-sm py-3 text-center text-[10px] font-bold uppercase tracking-[0.15em] text-white transition-all duration-200 hover:bg-[#080808] cursor-pointer"
             >
-              + Panier
+              {lang === "fr" ? "+ Panier" : "+ السلة"}
             </button>
             <Link
               to={`/produit/${produit.id}`}
-              className="flex-1 rounded-full bg-white/90 backdrop-blur-sm py-3 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-[#080808] transition-all duration-200 hover:bg-white"
+              className="flex-1 rounded-full bg-white/90 backdrop-blur-sm py-3 text-center text-[10px] font-bold uppercase tracking-[0.15em] text-[#080808] transition-all duration-200 hover:bg-white"
             >
-              Voir plus
+              {lang === "fr" ? "Voir plus" : "تفاصيل"}
             </Link>
           </div>
         </div>
@@ -195,7 +202,7 @@ export default function CarteProduit({ produit }) {
       {/* ── INFO ZONE ── */}
       <div className="px-1 pt-4">
         {/* Color swatches */}
-        <div className="flex items-center gap-1.5">
+        <div className={`flex items-center gap-1.5 ${lang === "ar" ? "flex-row-reverse justify-end" : ""}`}>
           {couleurs.slice(0, 6).map((couleur, index) => {
             const hex = typeof couleur === "string" ? couleur : couleur.hex;
             const label = typeof couleur === "string" ? `Couleur ${index + 1}` : couleur.nom;
@@ -206,7 +213,7 @@ export default function CarteProduit({ produit }) {
                 title={label}
                 type="button"
                 onClick={() => handleColorClick(couleur)}
-                className={`h-3.5 w-3.5 rounded-full border transition-all duration-200 ${
+                className={`h-3.5 w-3.5 rounded-full border transition-all duration-200 cursor-pointer ${
                   isActive
                     ? "border-[#080808] scale-125 ring-2 ring-offset-1 ring-[#c9a84c]"
                     : "border-[#d0cac0] hover:scale-110"
@@ -220,11 +227,11 @@ export default function CarteProduit({ produit }) {
         {/* Name & price */}
         <Link
           to={`/produit/${produit.id}`}
-          className="mt-3 block text-sm font-medium text-[#080808] transition-colors duration-200 hover:text-[#c9a84c] leading-snug"
+          className={`mt-3 block text-sm font-medium text-[#080808] transition-colors duration-200 hover:text-[#c9a84c] leading-snug ${lang === "ar" ? "text-right" : "text-left"}`}
         >
           {produit.nom}
         </Link>
-        <p className="mt-1 text-sm font-semibold text-[#c9a84c]">{formatPrice(produit.prix)}</p>
+        <p className={`mt-1 text-sm font-semibold text-[#c9a84c] ${lang === "ar" ? "text-right" : "text-left"}`}>{formatPrice(produit.prix, lang)}</p>
       </div>
     </article>
   );

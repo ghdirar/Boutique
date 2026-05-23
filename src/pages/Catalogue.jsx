@@ -3,15 +3,27 @@ import { useSearchParams } from "react-router-dom";
 import CarteProduit from "../components/CarteProduit";
 import Spinner from "../components/Spinner";
 import useProduits from "../hooks/useProduits";
+import { useLanguage } from "../context/LanguageContext";
 
 const categories = ["sacs-main"];
-const sortOptions = [
-  { value: "nouveautes", label: "Nouveautés" },
-  { value: "prix-asc", label: "Prix croissant" },
-  { value: "prix-desc", label: "Prix décroissant" },
-];
+
+const colorTranslations = {
+  "noir": "أسود",
+  "rouge": "أحمر",
+  "blanc": "أبيض",
+  "bleu": "أزرق",
+  "vert": "أخضر",
+  "camel": "كامل",
+  "marron": "بني",
+  "gris": "رمادي",
+  "rose": "وردي",
+  "beige": "بيج",
+  "doré": "ذهبي",
+  "argenté": "فضي"
+};
 
 export default function Catalogue() {
+  const { lang, t } = useLanguage();
   const { produits, loading, error } = useProduits();
   const [searchParams, setSearchParams] = useSearchParams();
   const [sort, setSort] = useState("nouveautes");
@@ -27,6 +39,12 @@ export default function Catalogue() {
 
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(10000);
+
+  const sortOptions = useMemo(() => [
+    { value: "nouveautes", label: t("nouveautes") },
+    { value: "prix-asc", label: lang === "ar" ? "السعر: من الأقل إلى الأعلى" : "Prix croissant" },
+    { value: "prix-desc", label: lang === "ar" ? "السعر: من الأعلى إلى الأقل" : "Prix décroissant" },
+  ], [lang, t]);
 
   const availableColors = useMemo(() => {
     const colorSet = new Set();
@@ -90,20 +108,22 @@ export default function Catalogue() {
       {hasActiveFilters && (
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#c9a84c]">
-            Filtres actifs
+            {lang === "ar" ? "الفلاتر النشطة" : "Filtres actifs"}
           </span>
           <button
             onClick={resetFilters}
             className="rounded-full bg-[#080808] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white transition hover:bg-[#c9a84c]"
           >
-            Tout effacer
+            {lang === "ar" ? "حذف الكل" : "Tout effacer"}
           </button>
         </div>
       )}
 
       {/* Category */}
-      <div>
-        <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-[#080808]">Catégorie</p>
+      <div className="text-start">
+        <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-[#080808]">
+          {lang === "ar" ? "الفئة" : "Catégorie"}
+        </p>
         <div className="space-y-3">
           {categories.map((cat) => (
             <label key={cat} className="flex cursor-pointer items-center gap-3 text-sm text-[#7a7368]">
@@ -113,7 +133,7 @@ export default function Catalogue() {
                 onChange={() => updateCategory(cat)}
               />
               <span className={activeCategory === cat ? "font-semibold text-[#080808]" : ""}>
-                {cat.replaceAll("-", " ")}
+                {t(cat.replace("-", "_"))}
               </span>
             </label>
           ))}
@@ -121,60 +141,75 @@ export default function Catalogue() {
       </div>
 
       {/* Price */}
-      <div>
-        <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-[#080808]">Prix (DA)</p>
+      <div className="text-start">
+        <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-[#080808]">
+          {lang === "ar" ? "السعر (د.ج)" : "Prix (DA)"}
+        </p>
         <div className="space-y-5">
           <div>
             <div className="mb-2 flex justify-between text-[11px] text-[#7a7368]">
-              <span>Min</span>
-              <span className="font-semibold text-[#080808]">{minPrice.toLocaleString()} DA</span>
+              <span>{lang === "ar" ? "الحد الأدنى" : "Min"}</span>
+              <span className="font-semibold text-[#080808]">
+                {lang === "ar" ? `${minPrice.toLocaleString()} د.ج` : `${minPrice.toLocaleString()} DA`}
+              </span>
             </div>
             <input
               type="range" min="0" max="10000" step="100"
               value={minPrice}
               onChange={(e) => setMinPrice(Math.min(Number(e.target.value), maxPrice - 100))}
+              className="w-full"
             />
           </div>
           <div>
             <div className="mb-2 flex justify-between text-[11px] text-[#7a7368]">
-              <span>Max</span>
-              <span className="font-semibold text-[#080808]">{maxPrice.toLocaleString()} DA</span>
+              <span>{lang === "ar" ? "الحد الأقصى" : "Max"}</span>
+              <span className="font-semibold text-[#080808]">
+                {lang === "ar" ? `${maxPrice.toLocaleString()} د.ج` : `${maxPrice.toLocaleString()} DA`}
+              </span>
             </div>
             <input
               type="range" min="0" max="10000" step="100"
               value={maxPrice}
               onChange={(e) => setMaxPrice(Math.max(Number(e.target.value), minPrice + 100))}
+              className="w-full"
             />
           </div>
         </div>
         <div className="mt-3 rounded-xl bg-[#080808]/[0.04] px-4 py-3 text-center text-[12px] font-semibold text-[#080808]">
-          {minPrice.toLocaleString()} – {maxPrice.toLocaleString()} DA
+          {lang === "ar"
+            ? `${minPrice.toLocaleString()} – ${maxPrice.toLocaleString()} د.ج`
+            : `${minPrice.toLocaleString()} – ${maxPrice.toLocaleString()} DA`}
         </div>
       </div>
 
       {/* Colors */}
       {availableColors.length > 0 && (
-        <div>
-          <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-[#080808]">Couleurs</p>
+        <div className="text-start">
+          <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-[#080808]">
+            {lang === "ar" ? "الألوان" : "Couleurs"}
+          </p>
           <div className="flex flex-wrap gap-2.5">
-            {availableColors.map(({ hex, nom }) => (
-              <button
-                key={hex}
-                type="button"
-                title={nom}
-                onClick={() => toggleColor(hex)}
-                className={`relative h-8 w-8 rounded-full border-2 transition-all duration-200 ${
-                  activeColors.includes(hex)
-                    ? "border-[#c9a84c] scale-110 shadow-[0_0_0_3px_rgba(201,168,76,0.2)]"
-                    : "border-[#d0cac0] hover:scale-110"
-                }`}
-                style={{ backgroundColor: hex }}
-              >
-                {activeColors.includes(hex) && (
-                  <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white mix-blend-difference">✓</span>
-                )}
-              </button>
-            ))}
+            {availableColors.map(({ hex, nom }) => {
+              const translatedNom = lang === "ar" ? (colorTranslations[nom.toLowerCase()] || nom) : nom;
+              return (
+                <button
+                  key={hex}
+                  type="button"
+                  title={translatedNom}
+                  onClick={() => toggleColor(hex)}
+                  className={`relative h-8 w-8 rounded-full border-2 transition-all duration-200 ${
+                    activeColors.includes(hex)
+                      ? "border-[#c9a84c] scale-110 shadow-[0_0_0_3px_rgba(201,168,76,0.2)]"
+                      : "border-[#d0cac0] hover:scale-110"
+                  }`}
+                  style={{ backgroundColor: hex }}
+                >
+                  {activeColors.includes(hex) && (
+                    <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white mix-blend-difference">✓</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -185,12 +220,18 @@ export default function Catalogue() {
     <div className="min-h-screen bg-[#f7f4ef]">
       {/* ── Header ── */}
       <div className="border-b border-black/[0.05] bg-white py-12 px-5 text-center animate-fade-up">
-        <p className="section-label mb-3">Catalogue</p>
+        <p className="section-label mb-3">{lang === "ar" ? "الكتالوج" : "Catalogue"}</p>
         <h1 className="section-title">
-          {searchQuery ? `Résultats pour « ${searchQuery} »` : "Maroquinerie"}
+          {searchQuery 
+            ? (lang === "ar" ? `نتائج البحث عن « ${searchQuery} »` : `Résultats pour « ${searchQuery} »`)
+            : (lang === "ar" ? "مصنوعات جلدية فاخرة" : "Maroquinerie")}
         </h1>
         {searchQuery && (
-          <p className="mt-2 text-sm text-[#7a7368]">{filteredProducts.length} résultat{filteredProducts.length > 1 ? "s" : ""} trouvé{filteredProducts.length > 1 ? "s" : ""}</p>
+          <p className="mt-2 text-sm text-[#7a7368]">
+            {lang === "ar"
+              ? `تم العثور على ${filteredProducts.length} منتج`
+              : `${filteredProducts.length} résultat${filteredProducts.length > 1 ? "s" : ""} trouvé${filteredProducts.length > 1 ? "s" : ""}`}
+          </p>
         )}
       </div>
 
@@ -204,7 +245,7 @@ export default function Catalogue() {
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M4 6h16M7 12h10M10 18h4"/>
             </svg>
-            Filtres {hasActiveFilters && <span className="ml-1 h-2 w-2 rounded-full bg-[#c9a84c]" />}
+            {lang === "ar" ? "الفلاتر" : "Filtres"} {hasActiveFilters && <span className="ml-1 h-2 w-2 rounded-full bg-[#c9a84c]" />}
           </button>
           <select
             value={sort}
@@ -226,7 +267,15 @@ export default function Catalogue() {
             {/* Sort bar (desktop) */}
             <div className="mb-8 hidden items-center justify-between lg:flex">
               <p className="text-sm text-[#7a7368]">
-                <span className="font-semibold text-[#080808]">{filteredProducts.length}</span> article{filteredProducts.length > 1 ? "s" : ""}
+                {lang === "ar" ? (
+                  <>
+                    <span className="font-semibold text-[#080808]">{filteredProducts.length}</span> قطعة
+                  </>
+                ) : (
+                  <>
+                    <span className="font-semibold text-[#080808]">{filteredProducts.length}</span> article{filteredProducts.length > 1 ? "s" : ""}
+                  </>
+                )}
               </p>
               <select
                 value={sort}
@@ -237,7 +286,7 @@ export default function Catalogue() {
               </select>
             </div>
 
-            {loading && <Spinner label="Chargement du catalogue..." />}
+            {loading && <Spinner label={lang === "ar" ? "جاري تحميل الكتالوج..." : "Chargement du catalogue..."} />}
             {error && <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</p>}
             {!loading && !error && (
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -247,13 +296,17 @@ export default function Catalogue() {
                 {filteredProducts.length === 0 && (
                   <div className="col-span-full py-24 text-center">
                     <p className="text-4xl mb-4">🔍</p>
-                    <p className="text-lg font-medium text-[#080808]">Aucun résultat</p>
-                    <p className="mt-2 text-sm text-[#7a7368]">Aucun produit ne correspond à vos critères de recherche.</p>
+                    <p className="text-lg font-medium text-[#080808]">
+                      {lang === "ar" ? "لا توجد نتائج" : "Aucun résultat"}
+                    </p>
+                    <p className="mt-2 text-sm text-[#7a7368]">
+                      {t("no_results")}
+                    </p>
                     <button
                       onClick={resetFilters}
                       className="btn-secondary mt-6 inline-flex"
                     >
-                      Réinitialiser les filtres
+                      {t("reinitialiser")}
                     </button>
                   </div>
                 )}
@@ -267,9 +320,11 @@ export default function Catalogue() {
       {isSidebarOpen && (
         <div className="fixed inset-0 z-[70] flex lg:hidden animate-fade-in">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
-          <div className="relative ml-auto h-full w-[300px] overflow-y-auto bg-[#f7f4ef] shadow-2xl p-6 animate-slide-right">
+          <div className={`relative ${lang === "ar" ? "mr-auto ml-0 animate-slide-left" : "ml-auto mr-0 animate-slide-right"} h-full w-[300px] overflow-y-auto bg-[#f7f4ef] shadow-2xl p-6`}>
             <div className="mb-6 flex items-center justify-between">
-              <p className="text-sm font-bold uppercase tracking-[0.2em]">Filtres</p>
+              <p className="text-sm font-bold uppercase tracking-[0.2em]">
+                {lang === "ar" ? "الفلاتر" : "Filtres"}
+              </p>
               <button onClick={() => setIsSidebarOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-black/[0.05]">✕</button>
             </div>
             <Sidebar />
@@ -277,7 +332,9 @@ export default function Catalogue() {
               onClick={() => setIsSidebarOpen(false)}
               className="btn-primary mt-8 w-full"
             >
-              Appliquer ({filteredProducts.length} résultats)
+              {lang === "ar"
+                ? `تطبيق (${filteredProducts.length} نتيجة)`
+                : `Appliquer (${filteredProducts.length} résultats)`}
             </button>
           </div>
         </div>
@@ -285,3 +342,4 @@ export default function Catalogue() {
     </div>
   );
 }
+

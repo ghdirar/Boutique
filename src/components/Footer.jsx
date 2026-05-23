@@ -1,32 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
-const columns = [
-  {
-    title: "Collections",
-    links: [
-      { label: "Sac à la main", to: "/catalogue?categorie=sacs-main" },
-      { label: "Nouveautés", to: "/catalogue" },
-      { label: "Meilleures ventes", to: "/catalogue" },
-    ],
-  },
-  {
-    title: "Service client",
-    links: [
-      { label: "Livraison en Algérie", modalId: "livraison" },
-      { label: "Comment commander ?", modalId: "commander" },
-      { label: "Nous contacter", modalId: "contact" },
-    ],
-  },
-  {
-    title: "La Boutique",
-    links: [
-      { label: "Notre histoire", modalId: "histoire" },
-      { label: "Savoir-faire artisanal", modalId: "savoir-faire" },
-      { label: "Conditions générales", modalId: "cgu" },
-    ],
-  },
-];
+import { useLanguage } from "../context/LanguageContext";
 
 // Real social media icons as SVGs
 const socials = [
@@ -39,7 +13,6 @@ const socials = [
       </svg>
     ),
   },
-  
   {
     label: "TikTok",
     href: "https://www.tiktok.com/@lavotre_dz",
@@ -51,15 +24,50 @@ const socials = [
   },
 ];
 
-const policies = [
-  "📦 Livraison dans toute l'Algérie",
-  "💰 Paiement à la livraison",
-  "✨ Qualité artisanale premium",
-  "📞 Support WhatsApp & Instagram",
-  "🔥 3 articles achetés = Livraison gratuite  "];
-
 export default function Footer() {
+  const { lang, t } = useLanguage();
   const [activeModal, setActiveModal] = useState(null);
+
+  const policies = lang === "ar" ? [
+    "📦 توصيل لكافة الولايات الجزائرية",
+    "💰 الدفع عند الاستلام",
+    "✨ جودة صناعة يدوية فاخرة",
+    "📞 خدمة العملاء عبر واتساب وإنستغرام",
+    "🔥 3 قطع أو أكثر = التوصيل مجاني"
+  ] : [
+    "📦 Livraison dans toute l'Algérie",
+    "💰 Paiement à la livraison",
+    "✨ Qualité artisanale premium",
+    "📞 Support WhatsApp & Instagram",
+    "🔥 3 articles achetés = Livraison gratuite"
+  ];
+
+  const columns = [
+    {
+      title: t("collections"),
+      links: [
+        { label: t("sacs_main"), to: "/catalogue?categorie=sacs-main" },
+        { label: t("nouveautes"), to: "/catalogue" },
+        { label: lang === "ar" ? "الأكثر مبيعًا" : "Meilleures ventes", to: "/catalogue" },
+      ],
+    },
+    {
+      title: lang === "ar" ? "خدمة العملاء" : "Service client",
+      links: [
+        { label: lang === "ar" ? "التوصيل في الجزائر" : "Livraison en Algérie", modalId: "livraison" },
+        { label: t("comment_commander"), modalId: "commander" },
+        { label: t("nous_contacter"), modalId: "contact" },
+      ],
+    },
+    {
+      title: lang === "ar" ? "المتجر" : "La Boutique",
+      links: [
+        { label: t("histoire"), modalId: "histoire" },
+        { label: lang === "ar" ? "الخبرة الحرفية" : "Savoir-faire artisanal", modalId: "savoir-faire" },
+        { label: t("cgu_footer"), modalId: "cgu" },
+      ],
+    },
+  ];
 
   const renderModalContent = () => {
     switch (activeModal) {
@@ -67,45 +75,86 @@ export default function Footer() {
         return (
           <div className="space-y-4">
             <div className="text-center">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">Service Client</span>
-              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">Livraison en Algérie</h3>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">
+                {lang === "ar" ? "خدمة العملاء" : "Service Client"}
+              </span>
+              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">
+                {lang === "ar" ? "التوصيل في الجزائر" : "Livraison en Algérie"}
+              </h3>
             </div>
             <div className="my-4 border-b border-black/[0.08]" />
-            <div className="space-y-4 text-sm leading-relaxed text-[#555]">
+            <div className={`space-y-4 text-sm leading-relaxed text-[#555] ${lang === "ar" ? "text-right" : "text-left"}`}>
               <p>
-                Nous livrons vos commandes d'exception directement à votre domicile sur l'ensemble des <strong>58 wilayas d'Algérie</strong>.
+                {lang === "ar" ? (
+                  <>
+                    نقوم بتوصيل طلباتكم الاستثنائية مباشرة إلى منازلكم في جميع الـ{" "}
+                    <strong>58 ولاية جزائرية</strong>.
+                  </>
+                ) : (
+                  <>
+                    Nous livrons vos commandes d'exception directement à votre domicile sur l'ensemble des <strong>58 wilayas d'Algérie</strong>.
+                  </>
+                )}
               </p>
               <div className="rounded-2xl bg-black/[0.03] p-4 space-y-3">
                 <div className="flex justify-between text-xs font-semibold uppercase tracking-wider text-[#080808]">
-                  <span>Zone</span>
-                  <span>Tarif</span>
-                  <span>Délai</span>
+                  <span>{lang === "ar" ? "المنطقة" : "Zone"}</span>
+                  <span>{lang === "ar" ? "السعر" : "Tarif"}</span>
+                  <span>{lang === "ar" ? "المدة" : "Délai"}</span>
                 </div>
                 <div className="border-t border-black/[0.05] pt-2" />
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-medium text-[#080808]">Alger & Environs</span>
-                  <span className="text-[#c9a84c] font-bold">400 DA</span>
-                  <span className="text-white bg-[#080808] px-2 py-0.5 rounded text-[10px]">24h</span>
+                  <span className="font-medium text-[#080808]">
+                    {lang === "ar" ? "الجزائر العاصمة وضواحيها" : "Alger & Environs"}
+                  </span>
+                  <span className="text-[#c9a84c] font-bold">
+                    {lang === "ar" ? "400 د.ج" : "400 DA"}
+                  </span>
+                  <span className="text-white bg-[#080808] px-2 py-0.5 rounded text-[10px]">
+                    {lang === "ar" ? "24 ساعة" : "24h"}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-medium text-[#080808]">Grandes Wilayas</span>
-                  <span className="text-[#c9a84c] font-bold">600 DA</span>
-                  <span className="text-[#666]">48h</span>
+                  <span className="font-medium text-[#080808]">
+                    {lang === "ar" ? "الولايات الكبرى" : "Grandes Wilayas"}
+                  </span>
+                  <span className="text-[#c9a84c] font-bold">
+                    {lang === "ar" ? "600 د.ج" : "600 DA"}
+                  </span>
+                  <span className="text-[#666]">
+                    {lang === "ar" ? "48 ساعة" : "48h"}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-medium text-[#080808]">Sud & Wilayas éloignées</span>
-                  <span className="text-[#c9a84c] font-bold">800 DA</span>
-                  <span className="text-[#666]">72h</span>
+                  <span className="font-medium text-[#080808]">
+                    {lang === "ar" ? "الجنوب والولايات البعيدة" : "Sud & Wilayas éloignées"}
+                  </span>
+                  <span className="text-[#c9a84c] font-bold">
+                    {lang === "ar" ? "800 د.ج" : "800 DA"}
+                  </span>
+                  <span className="text-[#666]">
+                    {lang === "ar" ? "72 ساعة" : "72h"}
+                  </span>
                 </div>
               </div>
               <div className="flex items-start gap-3 rounded-2xl bg-[#c9a84c]/10 p-4 border border-[#c9a84c]/20">
                 <span className="text-lg">🎁</span>
                 <p className="text-xs text-[#8c6b24] leading-relaxed">
-                  <strong>3 articles achetés = Livraison gratuite !</strong> L'offre s'applique automatiquement lors de la validation de votre panier.
+                  {lang === "ar" ? (
+                    <>
+                      <strong>عند شراء 3 قطع = التوصيل مجاني!</strong> يُطبق العرض تلقائيًا عند تأكيد سلة التسوق.
+                    </>
+                  ) : (
+                    <>
+                      <strong>3 articles achetés = Livraison gratuite !</strong> L'offre s'applique automatiquement lors de la validation de votre panier.
+                    </>
+                  )}
                 </p>
               </div>
               <p className="text-xs text-[#777] italic text-center">
-                * Le paiement s'effectue exclusivement en espèces (main à main) lors de la réception de votre colis.
+                {lang === "ar"
+                  ? "* الدفع يتم حصريًا نقدًا عند استلام الطرد يدًا بيد."
+                  : "* Le paiement s'effectue exclusivement en espèces (main à main) lors de la réception de votre colis."}
               </p>
             </div>
           </div>
@@ -114,38 +163,48 @@ export default function Footer() {
         return (
           <div className="space-y-4">
             <div className="text-center">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">Ergonomie</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">
+                {lang === "ar" ? "المقاس والتصميم" : "Ergonomie"}
+              </span>
             </div>
             <div className="my-4 border-b border-black/[0.08]" />
             <div className="space-y-4 text-sm text-[#555]">
-              <p className="text-center">
-                Trouvez le format idéal pour vos besoins parmi nos créations phares.
+              <p className="text-center text-xs">
+                {lang === "ar"
+                  ? "اكتشفي المقاس المثالي لاحتياجاتكِ من بين إبداعاتنا الرائدة."
+                  : "Trouvez le format idéal pour vos besoins parmi nos créations phares."}
               </p>
               <div className="space-y-3">
                 {[
                   {
-                    name: "Format Petit / Mini Bag",
+                    name: lang === "ar" ? "الحجم الصغير / Mini Bag" : "Format Petit / Mini Bag",
                     dims: "18 x 13 x 8 cm",
-                    desc: "Idéal pour vos sorties légères. Accueille aisément votre smartphone (tous formats), clés, rouge à lèvres et porte-cartes.",
+                    desc: lang === "ar"
+                      ? "مثالية للخروجات الخفيفة. تتسع بسهولة لهاتفكِ الذكي (بجميع أحجامه)، المفاتيح، أحمر الشفاه وحامل البطاقات."
+                      : "Idéal pour vos sorties légères. Accueille aisément votre smartphone (tous formats), clés, rouge à lèvres et porte-cartes.",
                     icon: "👜"
                   },
                   {
-                    name: "Format Moyen / Daily Bag",
+                    name: lang === "ar" ? "الحجم المتوسط / Daily Bag" : "Format Moyen / Daily Bag",
                     dims: "24 x 18 x 10 cm",
-                    desc: "Le compagnon parfait du quotidien. Conçu pour accueillir vos essentiels, une petite tablette, maquillage, lunettes de soleil et portefeuille.",
+                    desc: lang === "ar"
+                      ? "الرفيق المثالي لكل يوم. مصممة لتتسع لأساسياتكِ، جهاز لوحي صغير، أدوات التجميل، نظارات شمسية ومحفظة نقود."
+                      : "Le compagnon parfait du quotidien. Conçu pour accueillir vos essentiels, une petite tablette, maquillage, lunettes de soleil et portefeuille.",
                     icon: "💼"
                   },
                   {
-                    name: "Format Grand / Tote Bag / Cabas",
+                    name: lang === "ar" ? "الحجم الكبير / Tote Bag / Cabas" : "Format Grand / Tote Bag / Cabas",
                     dims: "38 x 28 x 15 cm",
-                    desc: "Un volume généreux pour les journées actives ou le voyage. Permet de transporter un ordinateur portable jusqu'à 14 pouces, des documents A4 et vos effets personnels.",
+                    desc: lang === "ar"
+                      ? "حجم واسع ومثالي للأيام المليئة بالنشاط أو السفر. تتسع لحمل جهاز كمبيوتر محمول حتى 14 بوصة، وثائق مقاس A4 وأغراضكِ الشخصية."
+                      : "Un volume généreux pour les journées actives ou le voyage. Permet de transporter un ordinateur portable jusqu'à 14 pouces, des documents A4 et vos effets personnels.",
                     icon: "🎒"
                   }
                 ].map((size) => (
-                  <div key={size.name} className="flex gap-4 p-3 rounded-2xl bg-white shadow-sm border border-black/[0.02]">
+                  <div key={size.name} className="flex gap-4 p-3 rounded-2xl bg-white shadow-sm border border-black/[0.02] text-start">
                     <span className="text-2xl mt-1">{size.icon}</span>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-baseline flex-wrap">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-baseline flex-wrap gap-2">
                         <h4 className="font-semibold text-xs uppercase tracking-wider text-[#080808]">{size.name}</h4>
                         <span className="text-[11px] font-bold text-[#c9a84c] bg-[#c9a84c]/10 px-2 py-0.5 rounded">{size.dims}</span>
                       </div>
@@ -161,30 +220,42 @@ export default function Footer() {
         return (
           <div className="space-y-4">
             <div className="text-center">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">Aide à l'achat</span>
-              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">Comment commander ?</h3>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">
+                {lang === "ar" ? "مساعدة في الشراء" : "Aide à l'achat"}
+              </span>
+              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">
+                {lang === "ar" ? "كيفية الطلب ؟" : "Comment commander ?"}
+              </h3>
             </div>
             <div className="my-4 border-b border-black/[0.08]" />
-            <div className="space-y-5 text-sm text-[#555]">
+            <div className={`space-y-5 text-sm text-[#555] ${lang === "ar" ? "text-right" : "text-left"}`}>
               <p className="text-center text-xs">
-                Commander votre pièce de maroquinerie n'a jamais été aussi simple. Suivez ces 3 étapes :
+                {lang === "ar"
+                  ? "لم يكن طلب قطعتكِ الجلدية الفاخرة بهذه السهولة من قبل. اتبعي هذه الخطوات الثلاث:"
+                  : "Commander votre pièce de maroquinerie n'a jamais été aussi simple. Suivez ces 3 étapes :"}
               </p>
               <div className="space-y-4">
                 {[
                   {
                     step: "01",
-                    title: "Sélectionnez votre création",
-                    desc: "Parcourez nos collections, choisissez le modèle qui vous inspire et sélectionnez la couleur de cuir souhaitée."
+                    title: lang === "ar" ? "اختاري إبداعكِ المفضّل" : "Sélectionnez votre création",
+                    desc: lang === "ar"
+                      ? "تصفحي مجموعاتنا، واختاري الموديل الذي يلهمكِ ثم حددي لون الجلد المطلوب."
+                      : "Parcourez nos collections, choisissez le modèle qui vous inspire et sélectionnez la couleur de cuir souhaitée."
                   },
                   {
                     step: "02",
-                    title: "Remplissez vos informations",
-                    desc: "Validez votre panier et complétez notre formulaire simplifié avec vos coordonnées : Nom, Téléphone et votre Wilaya."
+                    title: lang === "ar" ? "املئي معلوماتكِ" : "Remplissez vos informations",
+                    desc: lang === "ar"
+                      ? "أكدي سلة التسوق الخاصة بكِ واكملي نموذجنا المبسط بمعلومات الاتصال الخاصة بكِ: الاسم، رقم الهاتف والولاية."
+                      : "Validez votre panier et complétez notre formulaire simplifié avec vos coordonnées : Nom, Téléphone et votre Wilaya."
                   },
                   {
                     step: "03",
-                    title: "Confirmation téléphonique & Livraison",
-                    desc: "Notre service client vous appelle sous 24h pour valider la commande. Votre colis est expédié et vous payez cash à sa réception."
+                    title: lang === "ar" ? "التأكيد الهاتفي والشحن" : "Confirmation téléphonique & Livraison",
+                    desc: lang === "ar"
+                      ? "يتصل بكِ فريق خدمة العملاء لدينا خلال 24 ساعة لتأكيد الطلب. ثم يُشحن طردكِ وتدفعين نقدًا عند الاستلام."
+                      : "Notre service client vous appelle sous 24h pour valider la commande. Your colis est expédié et vous payez cash à sa réception."
                   }
                 ].map((s) => (
                   <div key={s.step} className="flex gap-4">
@@ -203,24 +274,32 @@ export default function Footer() {
         return (
           <div className="space-y-4">
             <div className="text-center">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">Nous Contacter</span>
-              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">Assistance</h3>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">
+                {lang === "ar" ? "اتصلي بنا" : "Nous Contacter"}
+              </span>
+              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">
+                {lang === "ar" ? "الدعم والمساعدة" : "Assistance"}
+              </h3>
             </div>
             <div className="my-4 border-b border-black/[0.08]" />
             <div className="space-y-5 text-sm text-[#555]">
               <p className="text-center text-xs leading-relaxed">
-                Notre équipe est à votre entière disposition pour répondre à toutes vos questions sur nos créations ou vos commandes.
+                {lang === "ar"
+                  ? "فريقنا في كامل الاستعداد للإجابة على جميع استفساراتكِ بخصوص إبداعاتنا أو طلباتكِ."
+                  : "Notre équipe est à votre entière disposition pour répondre à toutes vos questions sur nos créations ou vos commandes."}
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <a
                   href="https://www.instagram.com/lavotre_dz"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm border border-black/[0.02] hover:border-[#c9a84c]/30 transition group"
+                  className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm border border-black/[0.02] hover:border-[#c9a84c]/30 transition group text-start"
                 >
                   <span className="text-xl">📸</span>
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#080808] group-hover:text-[#c9a84c]">Instagram</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#080808] group-hover:text-[#c9a84c]">
+                      {lang === "ar" ? "إنستغرام" : "Instagram"}
+                    </h4>
                     <p className="text-xs text-[#777]">@lavotre_dz</p>
                   </div>
                 </a>
@@ -228,27 +307,29 @@ export default function Footer() {
                   href="https://wa.me/213555123456"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm border border-black/[0.02] hover:border-[#25D366]/30 transition group"
+                  className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm border border-black/[0.02] hover:border-[#25D366]/30 transition group text-start"
                 >
                   <span className="text-xl">💬</span>
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#080808] group-hover:text-[#25D366]">WhatsApp</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#080808] group-hover:text-[#25D366]">
+                      {lang === "ar" ? "واتساب" : "WhatsApp"}
+                    </h4>
                     <p className="text-xs text-[#777]">+213 555 12 34 56</p>
                   </div>
                 </a>
               </div>
               <div className="rounded-2xl bg-[#080808] p-4 text-white text-xs space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-white/40">📍 Atelier</span>
-                  <span className="font-semibold text-white/90">Alger, Algérie</span>
+                  <span className="text-white/40">{lang === "ar" ? "📍 الورشة" : "📍 Atelier"}</span>
+                  <span className="font-semibold text-white/90">{lang === "ar" ? "الجزائر العاصمة، الجزائر" : "Alger, Algérie"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40">✉️ Email</span>
+                  <span className="text-white/40">{lang === "ar" ? "✉️ البريد" : "✉️ Email"}</span>
                   <span className="font-semibold text-white/90">contact@lavotre.dz</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/40">🕒 Horaires</span>
-                  <span className="font-semibold text-white/90">9h00 - 18h00 (Sam - Jeu)</span>
+                  <span className="text-white/40">{lang === "ar" ? "🕒 أوقات العمل" : "🕒 Horaires"}</span>
+                  <span className="font-semibold text-white/90">{lang === "ar" ? "9:00 صباحًا - 6:00 مساءً (السبت - الخميس)" : "9h00 - 18h00 (Sam - Jeu)"}</span>
                 </div>
               </div>
             </div>
@@ -258,21 +339,49 @@ export default function Footer() {
         return (
           <div className="space-y-4">
             <div className="text-center">
-              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">Notre Histoire</h3>
+              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">
+                {lang === "ar" ? "قصتنا" : "Notre Histoire"}
+              </h3>
             </div>
             <div className="my-4 border-b border-black/[0.08]" />
-            <div className="space-y-4 text-sm leading-relaxed text-[#555] text-justify text-xs">
+            <div className={`space-y-4 text-xs leading-relaxed text-[#555] ${lang === "ar" ? "text-right" : "text-justify"}`}>
               <p>
-                Née en Algérie d'une passion inconditionnelle pour les matières nobles et le design contemporain, <strong>La Votre</strong> est une maison de maroquinerie de luxe de nouvelle génération.
+                {lang === "ar" ? (
+                  <>
+                    ولدت دار <strong>لا فوتر (La Votre)</strong> في الجزائر بشغف لا حدود له بالمواد النبيلة والتصميم المعاصر، وهي دار مصنوعات جلدية فاخرة من الجيل الجديد.
+                  </>
+                ) : (
+                  <>
+                    Née en Algérie d'une passion inconditionnelle pour les matières nobles et le design contemporain, <strong>La Votre</strong> est une maison de maroquinerie de luxe de nouvelle génération.
+                  </>
+                )}
               </p>
               <p>
-                Notre philosophie réside dans l'alliance de lignes sculpturales modernes et de l'authenticité de l'artisanat traditionnel. Nous imaginons des silhouettes intemporelles, affranchies des tendances éphémères, pensées pour traverser le temps avec grâce.
+                {lang === "ar" ? (
+                  <>
+                    تكمن فلسفتنا في المزج بين الخطوط النحتية الحديثة وأصالة الحرف اليدوية التقليدية. نحن نتخيل تصميمات خالدة، بعيدة عن الصيحات العابرة، ومصممة لتعيش طويلاً بكل جاذبية.
+                  </>
+                ) : (
+                  <>
+                    Notre philosophie réside dans l'alliance de lignes sculpturales modernes et de l'authenticité de l'artisanat traditionnel. Nous imaginons des silhouettes intemporelles, affranchies des tendances éphémères, pensées pour traverser le temps avec grâce.
+                  </>
+                )}
               </p>
-              <blockquote className="border-l-2 border-[#c9a84c] pl-4 italic text-[#7a7368] text-xs py-1">
-                "Nous ne créons pas de simples accessoires, mais des compagnons de vie qui portent en eux l'excellence du détail."
+              <blockquote className={`border-t-0 border-b-0 border-y-0 ${lang === "ar" ? "border-r-2 pr-4 pl-0 border-l-0" : "border-l-2 pl-4 pr-0 border-r-0"} border-[#c9a84c] italic text-[#7a7368] text-xs py-1`}>
+                {lang === "ar"
+                  ? '"نحن لا نصنع مجرد إكسسوارات، بل نبتكر رفقاء عمر يحملون في تفاصيلهم أرقى درجات التميز والدقة."'
+                  : '"Nous ne créons pas de simples accessoires, mais des compagnons de vie qui portent en eux l\'excellence du détail."'}
               </blockquote>
               <p>
-                Aujourd'hui, chaque collection témoigne de notre exigence absolue quant à la sélection des peaux et de la rigueur de nos finitions, faisant de chaque sac une œuvre d'art unique.
+                {lang === "ar" ? (
+                  <>
+                    اليوم، تشهد كل مجموعة من مجموعاتنا على معاييرنا الصارمة والفريدة في اختيار الجلود ودقة التشطيبات النهائية، مما يجعل كل حقيبة بمثابة قطعة فنية فريدة من نوعها.
+                  </>
+                ) : (
+                  <>
+                    Aujourd'hui, chaque collection témoigne de notre exigence absolue quant à la sélection des peaux et de la rigueur de nos finitions, faisant de chaque sac une œuvre d'art unique.
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -281,21 +390,42 @@ export default function Footer() {
         return (
           <div className="space-y-4">
             <div className="text-center">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">Excellence</span>
-              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">Savoir-faire Artisanal</h3>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">
+                {lang === "ar" ? "التميز" : "Excellence"}
+              </span>
+              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">
+                {lang === "ar" ? "الخبرة الحرفية اليدوية" : "Savoir-faire Artisanal"}
+              </h3>
             </div>
             <div className="my-4 border-b border-black/[0.08]" />
-            <div className="space-y-4 text-sm leading-relaxed text-[#555] text-justify">
+            <div className={`space-y-4 text-sm leading-relaxed text-[#555] ${lang === "ar" ? "text-right" : "text-justify"}`}>
               <p>
-                Derrière chaque création signée <strong>La Votre</strong> se cachent des mains expertes de maîtres artisans maroquiniers dévoués à l'excellence.
+                {lang === "ar"
+                  ? "خلف كل إبداع يحمل توقيع لا فوتر (La Votre) تكمن الأيدي الخبيرة لأمهر الحرفيين المتفانين في تقديم أعلى مستويات التميز والجمال."
+                  : "Derrière chaque création signée La Votre se cachent des mains expertes de maîtres artisans maroquiniers dévoués à l'excellence."}
               </p>
               <div className="grid gap-3">
                 {[
-                  { title: "Cuirs d'exception", desc: "Cuirs de premier choix tannés de manière naturelle pour garantir leur patine unique et leur longévité." },
-                  { title: "Finitions manuelles", desc: "Chaque découpe, couture, assemblage et teinture de tranche est entièrement réalisé à la main." },
-                  { title: "Bouclerie en laiton", desc: "Fermoirs et ferrures en laiton massif pour un éclat persistant et une robustesse incomparable." }
+                  {
+                    title: lang === "ar" ? "جلود استثنائية" : "Cuirs d'exception",
+                    desc: lang === "ar"
+                      ? "جلود من النخب الأول المدبوغة بطريقة طبيعية لضمان مظهرها الفريد ومتانتها الطويلة."
+                      : "Cuirs de premier choix tannés de manière naturelle pour garantir leur patine unique et leur longévité."
+                  },
+                  {
+                    title: lang === "ar" ? "تشطيبات يدوية متقنة" : "Finitions manuelles",
+                    desc: lang === "ar"
+                      ? "كل قص وخياطة وتجميع وتلوين للحواف يتم تنفيذه يدويًا بالكامل بأقصى درجات الدقة."
+                      : "Chaque découpe, couture, assemblage et teinture de tranche est entièrement réalisé à la main."
+                  },
+                  {
+                    title: lang === "ar" ? "إكسسوارات نحاسية فاخرة" : "Bouclerie en laiton",
+                    desc: lang === "ar"
+                      ? "أقفال وإكسسوارات من النحاس الخالص لضمان بريق دائم وقوة تحمل لا تقارن."
+                      : "Fermoirs et ferrures en laiton massif pour un éclat persistant et une robustesse incomparable."
+                  }
                 ].map((item, idx) => (
-                  <div key={idx} className="p-3 bg-white rounded-2xl border border-black/[0.02]">
+                  <div key={idx} className="p-3 bg-white rounded-2xl border border-black/[0.02] text-start">
                     <h4 className="font-semibold text-xs uppercase tracking-wider text-[#080808]">{item.title}</h4>
                     <p className="mt-1 text-[11px] text-[#666] leading-relaxed">{item.desc}</p>
                   </div>
@@ -308,30 +438,48 @@ export default function Footer() {
         return (
           <div className="space-y-4">
             <div className="text-center">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">Légal</span>
-              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">Conditions Générales</h3>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c9a84c]">
+                {lang === "ar" ? "الجانب القانوني" : "Légal"}
+              </span>
+              <h3 className="mt-2 font-serif text-2xl font-normal uppercase tracking-[0.1em]">
+                {lang === "ar" ? "الشروط العامة للبيع والاستخدام" : "Conditions Générales"}
+              </h3>
             </div>
             <div className="my-4 border-b border-black/[0.08]" />
-            <div className="space-y-4 text-xs leading-relaxed text-[#555] max-h-[40vh] overflow-y-auto pr-2">
+            <div className={`space-y-4 text-xs leading-relaxed text-[#555] max-h-[40vh] overflow-y-auto ${lang === "ar" ? "pl-2 pr-0 text-right" : "pr-2 pl-0 text-left"}`}>
               <p>
-                Bienvenue sur le site officiel de <strong>La Votre</strong>. En passant commande, vous acceptez pleinement nos conditions générales de vente :
+                {lang === "ar"
+                  ? "مرحبًا بكم في الموقع الرسمي لدار لا فوتر (La Votre). عند تقديم طلبكِ، فإنكِ توافقين تمامًا على شروط البيع العامة الخاصة بنا:"
+                  : "Bienvenue sur le site officiel de La Votre. En passant commande, vous acceptez pleinement nos conditions générales de vente :"}
               </p>
               <div>
-                <h4 className="font-bold text-[#080808] uppercase text-[10px] tracking-wider">1. Modalités de Paiement</h4>
+                <h4 className="font-bold text-[#080808] uppercase text-[10px] tracking-wider">
+                  {lang === "ar" ? "1. طرق الدفع" : "1. Modalités de Paiement"}
+                </h4>
                 <p className="mt-1">
-                  Le paiement s'effectue exclusivement en espèces (DA) lors de la livraison en main à main de votre colis. Aucune transaction bancaire en ligne n'est requise.
+                  {lang === "ar"
+                    ? "يتم الدفع حصريًا نقدًا (بالدينار الجزائري) عند تسلم الطرد يدًا بيد. لا توجد حاجة إلى أي معاملات بنكية عبر الإنترنت."
+                    : "Le paiement s'effectue exclusivement en espèces (DA) lors de la livraison en main à main de votre colis. Aucune transaction bancaire en ligne n'est requise."}
                 </p>
               </div>
               <div>
-                <h4 className="font-bold text-[#080808] uppercase text-[10px] tracking-wider">2. Confirmation de Commande</h4>
+                <h4 className="font-bold text-[#080808] uppercase text-[10px] tracking-wider">
+                  {lang === "ar" ? "2. تأكيد الطلب" : "2. Confirmation de Commande"}
+                </h4>
                 <p className="mt-1">
-                  Toute commande fait l'objet d'un appel téléphonique de confirmation sous 24h à 48h. Sans réponse ou confirmation verbale de votre part après plusieurs tentatives, la commande sera annulée d'office.
+                  {lang === "ar"
+                    ? "تخضع جميع الطلبات لمكالمة هاتفية لتأكيد الطلب خلال 24 إلى 48 ساعة. في حالة عدم الرد أو التأكيد الشفهي منكِ بعد عدة محاولات، سيتم إلغاء الطلب تلقائيًا."
+                    : "Toute commande fait l'objet d'un appel téléphonique de confirmation sous 24h à 48h. Sans réponse ou confirmation verbale de votre part après plusieurs tentatives, la commande sera annulée d'office."}
                 </p>
               </div>
               <div>
-                <h4 className="font-bold text-[#080808] uppercase text-[10px] tracking-wider">3. Retours et Échanges</h4>
+                <h4 className="font-bold text-[#080808] uppercase text-[10px] tracking-wider">
+                  {lang === "ar" ? "3. الإرجاع والاستبدال" : "3. Retours et Échanges"}
+                </h4>
                 <p className="mt-1">
-                  Pas de retours ou échanges acceptés sauf si l'article présente un défaut de fabrication flagrant (signalé à la livraison lors de la remise en main propre).
+                  {lang === "ar"
+                    ? "لا نقبل الإرجاع أو الاستبدال إلا إذا كان المنتج يحتوي على عيب مصنعي واضح (يتم الإبلاغ عنه وتحديده فورًا لعامل التوصيل عند الاستلام)."
+                    : "Pas de retours ou échanges acceptés sauf si l'article présente un défaut de fabrication flagrant (signalé à la livraison lors de la remise en main propre)."}
                 </p>
               </div>
             </div>
@@ -348,11 +496,15 @@ export default function Footer() {
       <div className="mx-auto max-w-[1400px] px-5 pt-16 pb-12 lg:px-10">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           {/* Brand + Newsletter */}
-          <div>
+          <div className="text-start">
             <p className="font-serif text-2xl font-medium uppercase tracking-[0.22em] text-white">La Votre</p>
-            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-[#c9a84c]">Elle est déjà la votre</p>
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-[#c9a84c]">
+              {t("slogan")}
+            </p>
             <p className="mt-6 max-w-sm text-sm leading-7 text-white/50">
-              Maroquinerie d'exception fabriquée avec soin. Livraison partout en Algérie avec paiement à la réception.
+              {lang === "ar"
+                ? "صناعة جلدية استثنائية مصنوعة بكل حب وعناية. التوصيل إلى جميع الولايات الجزائرية والدفع عند الاستلام."
+                : "Maroquinerie d'exception fabriquée avec soin. Livraison partout en Algérie avec paiement à la réception."}
             </p>
 
             {/* Key policies */}
@@ -365,19 +517,19 @@ export default function Footer() {
             {/* Newsletter */}
             <div className="mt-8">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/60">
-                Recevoir nos nouveautés
+                {lang === "ar" ? "اشتركي لتصلكِ أحدث مجموعاتنا" : "Recevoir nos nouveautés"}
               </p>
               <div className="flex overflow-hidden rounded-full border border-white/10 bg-white/[0.04]">
                 <input
                   type="email"
-                  placeholder="Votre email..."
+                  placeholder={lang === "ar" ? "بريدكِ الإلكتروني..." : "Votre email..."}
                   className="flex-1 bg-transparent px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/30"
                 />
                 <button
                   type="button"
                   className="m-1 rounded-full bg-[#c9a84c] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.15em] text-white transition hover:bg-[#e2c46f]"
                 >
-                  OK
+                  {lang === "ar" ? "موافق" : "OK"}
                 </button>
               </div>
             </div>
@@ -413,7 +565,7 @@ export default function Footer() {
 
           {/* Link columns */}
           {columns.map((col) => (
-            <div key={col.title}>
+            <div key={col.title} className="text-start">
               <p className="mb-5 text-[11px] font-bold uppercase tracking-[0.25em] text-white/40">{col.title}</p>
               <div className="space-y-3">
                 {col.links.map((link) => {
@@ -423,7 +575,7 @@ export default function Footer() {
                         key={link.label}
                         type="button"
                         onClick={() => setActiveModal(link.modalId)}
-                        className="block text-left text-sm text-white/55 transition-colors duration-200 hover:text-[#c9a84c] w-full bg-transparent border-none p-0 cursor-pointer outline-none"
+                        className="block text-start text-sm text-white/55 transition-colors duration-200 hover:text-[#c9a84c] w-full bg-transparent border-none p-0 cursor-pointer outline-none"
                       >
                         {link.label}
                       </button>
@@ -458,9 +610,15 @@ export default function Footer() {
       {/* ── BOTTOM BAR ── */}
       <div className="border-t border-white/[0.05] py-5">
         <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-3 px-5 text-center sm:flex-row lg:px-10">
-          <p className="text-[11px] text-white/30">© 2026 La Votre. Tous droits réservés.</p>
+          <p className="text-[11px] text-white/30">
+            {lang === "ar"
+              ? "© 2026 لا فوتر. جميع الحقوق محفوظة."
+              : "© 2026 La Votre. Tous droits réservés."}
+          </p>
           <div className="flex items-center gap-3">
-            <span className="text-[11px] text-white/30">💰 Paiement à la livraison</span>
+            <span className="text-[11px] text-white/30">
+              {lang === "ar" ? "💰 الدفع عند الاستلام" : "💰 Paiement à la livraison"}
+            </span>
             <span className="text-white/20">•</span>
             <a
               href="https://www.instagram.com/lavotre_dz"
@@ -487,8 +645,8 @@ export default function Footer() {
             {/* Close Button */}
             <button
               onClick={() => setActiveModal(null)}
-              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-black/5 hover:bg-black/10 text-[#080808] transition duration-200 cursor-pointer"
-              aria-label="Fermer"
+              className={`absolute ${lang === "ar" ? "left-4" : "right-4"} top-4 flex h-8 w-8 items-center justify-center rounded-full bg-black/5 hover:bg-black/10 text-[#080808] transition duration-200 cursor-pointer`}
+              aria-label={lang === "ar" ? "إغلاق" : "Fermer"}
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M18 6 6 18M6 6l12 12" />
@@ -501,13 +659,13 @@ export default function Footer() {
             </div>
 
             {/* Modal Footer (Action Pill) */}
-            <div className="mt-6 flex justify-end border-t border-black/[0.05] pt-4">
+            <div className={`mt-6 flex ${lang === "ar" ? "justify-start" : "justify-end"} border-t border-black/[0.05] pt-4`}>
               <button
                 type="button"
                 onClick={() => setActiveModal(null)}
                 className="rounded-full bg-[#080808] hover:bg-[#c9a84c] text-white px-5 py-2 text-[10px] font-bold uppercase tracking-[0.15em] transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(8,8,8,0.1)] hover:shadow-[0_4px_16px_rgba(201,168,76,0.3)]"
               >
-                Fermer
+                {lang === "ar" ? "إغلاق" : "Fermer"}
               </button>
             </div>
           </div>

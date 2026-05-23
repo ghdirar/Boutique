@@ -4,18 +4,13 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { usePanier } from "../context/PanierContext";
 import { db } from "../firebase";
 import { wilayasCommunes, wilayas } from "../data/communesAlgerie";
+import { useLanguage } from "../context/LanguageContext";
 
-function formatPrice(value) {
-  return `${Number(value).toLocaleString("fr-FR")} DA`;
+function formatPrice(value, lang) {
+  return `${Number(value).toLocaleString("fr-FR")} ${lang === "ar" ? "د.ج" : "DA"}`;
 }
 
 const initialForm = { prenom: "", nom: "", telephone: "", email: "", adresse: "", wilaya: "", commune: "" };
-
-const steps = [
-  { id: 1, label: "Panier" },
-  { id: 2, label: "Informations" },
-  { id: 3, label: "Confirmation" },
-];
 
 function FieldLabel({ children }) {
   return (
@@ -25,20 +20,19 @@ function FieldLabel({ children }) {
   );
 }
 
-// ── Send notification email via EmailJS REST API (no npm needed)
-async function sendOrderNotification({ numero, client, articles, total }) {
+// ── Send notification email via EmailJS REST API
+async function sendOrderNotification({ numero, client, articles, total, lang }) {
   const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
   const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
   const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-  // If EmailJS credentials are not configured, skip silently
   if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
     console.info("EmailJS non configuré — notification ignorée.");
     return;
   }
 
   const articlesText = articles
-    .map((a) => `• ${a.nom} (${a.couleur}) x${a.quantite} = ${formatPrice(a.prix * a.quantite)}`)
+    .map((a) => `• ${a.nom} (${a.couleur}) x${a.quantite} = ${formatPrice(a.prix * a.quantite, lang)}`)
     .join("\n");
 
   try {
@@ -60,13 +54,12 @@ async function sendOrderNotification({ numero, client, articles, total }) {
           client_commune: client.commune,
           client_adresse: client.adresse,
           articles_text: articlesText,
-          total_price: formatPrice(total),
+          total_price: formatPrice(total, "fr"),
           order_date: new Date().toLocaleString("fr-DZ"),
         },
       }),
     });
   } catch (err) {
-    // Email failure should not block the order flow
     console.error("Erreur envoi email:", err);
   }
 }
@@ -74,6 +67,7 @@ async function sendOrderNotification({ numero, client, articles, total }) {
 export default function Commande() {
   const navigate = useNavigate();
   const { articles, total, viderPanier } = usePanier();
+  const { t, lang } = useLanguage();
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -83,12 +77,17 @@ export default function Commande() {
 
   const communes = form.wilaya ? (wilayasCommunes[form.wilaya] || []) : [];
 
+  const steps = [
+    { id: 1, label: t("caddie") },
+    { id: 2, label: t("etape_livraison") },
+    { id: 3, label: t("etape_commande") },
+  ];
+
   const canSubmit = useMemo(
     () =>
       form.prenom.trim() &&
       form.nom.trim() &&
       form.telephone.trim() &&
-      form.adresse.trim() &&
       form.wilaya.trim() &&
       form.commune.trim(),
     [form],
@@ -130,19 +129,20 @@ export default function Commande() {
         date: serverTimestamp(),
       });
 
-      // 2️⃣ Send notification email (non-blocking)
+      // 2️⃣ Send notification email
       sendOrderNotification({
         numero: numero || docRef.id,
         client: clientData,
         articles,
         total,
+        lang,
       });
 
       sessionStorage.setItem("magsin-last-order-id", numero || docRef.id);
       viderPanier();
       navigate("/confirmation", { replace: true, state: { orderId: numero || docRef.id } });
     } catch {
-      setError("Impossible d'enregistrer la commande. Réessayez.");
+      setError(lang === "fr" ? "Impossible d'enregistrer la commande. Réessayez." : "حدث خطأ أثناء حفظ الطلبية. يرجى المحاولة مرة أخرى.");
     } finally {
       setLoading(false);
     }
@@ -164,7 +164,7 @@ export default function Commande() {
                 </span>
               </div>
               {i < steps.length - 1 && (
-                <div className="mx-3 h-[1px] w-12 bg-black/[0.08] sm:w-20" />
+                <div className={`mx-3 h-[1px] w-12 bg-black/[0.08] sm:w-20`} />
               )}
             </div>
           ))}
@@ -176,61 +176,63 @@ export default function Commande() {
         {/* ── FORM ── */}
         <section className="animate-slide-left">
           <h1 className="font-serif text-3xl uppercase tracking-[0.1em] text-[#080808]">
-            Informations de livraison
+            {t("commande_titre")}
           </h1>
           <p className="mt-2 text-sm text-[#7a7368]">
-            Prénom, Nom, Téléphone, Adresse et Wilaya sont requis.
+            {lang === "fr" 
+              ? "Prénom, Nom, Téléphone, Wilaya et Commune sont requis."
+              : "يرجى إدخال الاسم، اللقب، الهاتف، الولاية والبلدية لإتمام طلبكِ."}
           </p>
 
           {/* Paiement à la livraison banner */}
-          <div className="mt-6 flex items-center gap-3 rounded-2xl border border-[#c9a84c]/20 bg-[#c9a84c]/5 px-5 py-4">
+          <div className={`mt-6 flex items-center gap-3 rounded-2xl border border-[#c9a84c]/20 bg-[#c9a84c]/5 px-5 py-4 ${lang === "ar" ? "text-right" : ""}`}>
             <span className="text-2xl">💰</span>
             <div>
-              <p className="text-sm font-semibold text-[#080808]">Paiement à la livraison</p>
-              <p className="text-xs text-[#7a7368]">Vous payez en espèces directement au livreur à la réception de votre commande.</p>
+              <p className="text-sm font-semibold text-[#080808]">{t("paiement_cash")}</p>
+              <p className="text-xs text-[#7a7368]">{t("paiement_cash_desc")}</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="block">
-                <FieldLabel>Prénom *</FieldLabel>
-                <input name="prenom" value={form.prenom} onChange={handleChange} className="input-base" required placeholder="Votre prénom" />
+                <FieldLabel>{t("prenom")} *</FieldLabel>
+                <input name="prenom" value={form.prenom} onChange={handleChange} className="input-base" required placeholder={lang === "fr" ? "Votre prénom" : "الاسم الأول"} />
               </label>
               <label className="block">
-                <FieldLabel>Nom *</FieldLabel>
-                <input name="nom" value={form.nom} onChange={handleChange} className="input-base" required placeholder="Votre nom" />
+                <FieldLabel>{t("nom")} *</FieldLabel>
+                <input name="nom" value={form.nom} onChange={handleChange} className="input-base" required placeholder={lang === "fr" ? "Votre nom" : "اللقب"} />
               </label>
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="block">
-                <FieldLabel>Téléphone *</FieldLabel>
+                <FieldLabel>{t("telephone")} *</FieldLabel>
                 <input name="telephone" type="tel" value={form.telephone} onChange={handleChange} className="input-base" required placeholder="0xxx xxx xxx" />
               </label>
               <label className="block">
-                <FieldLabel>Email (optionnel)</FieldLabel>
-                <input name="email" type="email" value={form.email} onChange={handleChange} className="input-base" placeholder="votre@email.com" />
+                <FieldLabel>{t("email")}</FieldLabel>
+                <input name="email" type="email" value={form.email} onChange={handleChange} className="input-base" placeholder="your@email.com" />
               </label>
             </div>
 
             <label className="block">
-              <FieldLabel>Adresse complète *</FieldLabel>
-              <textarea name="adresse" value={form.adresse} onChange={handleChange} rows="3" className="input-base resize-none" required placeholder="N° et nom de rue, quartier..." />
+              <FieldLabel>{t("adresse_complete")}</FieldLabel>
+              <textarea name="adresse" value={form.adresse} onChange={handleChange} rows="3" className="input-base resize-none" placeholder={lang === "fr" ? "N° et nom de rue, quartier... (optionnel)" : "رقم الباب، اسم الشارع، الحي... (اختياري)"} />
             </label>
 
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="block">
-                <FieldLabel>Wilaya *</FieldLabel>
-                <select name="wilaya" value={form.wilaya} onChange={handleChange} className="input-base" required>
-                  <option value="">Choisir une wilaya</option>
+                <FieldLabel>{t("wilaya")} *</FieldLabel>
+                <select name="wilaya" value={form.wilaya} onChange={handleChange} className="input-base cursor-pointer" required>
+                  <option value="">{t("choisir_wilaya")}</option>
                   {wilayas.map((w) => <option key={w} value={w}>{w}</option>)}
                 </select>
               </label>
               <label className="block">
-                <FieldLabel>Commune *</FieldLabel>
-                <select name="commune" value={form.commune} onChange={handleChange} className="input-base" required disabled={!form.wilaya}>
-                  <option value="">{form.wilaya ? "Choisir une commune" : "Choisir d'abord une wilaya"}</option>
+                <FieldLabel>{t("commune")} *</FieldLabel>
+                <select name="commune" value={form.commune} onChange={handleChange} className="input-base cursor-pointer" required disabled={!form.wilaya}>
+                  <option value="">{form.wilaya ? t("choisir_commune") : t("choisir_dabord_wilaya")}</option>
                   {communes.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </label>
@@ -245,7 +247,7 @@ export default function Commande() {
             <button
               type="submit"
               disabled={!canSubmit || loading}
-              className="btn-primary h-14 w-full text-[13px]"
+              className="btn-primary h-14 w-full text-[13px] cursor-pointer"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -253,15 +255,15 @@ export default function Commande() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
                   </svg>
-                  Envoi en cours...
+                  {t("chargement")}
                 </span>
               ) : (
-                "Confirmer la commande →"
+                lang === "fr" ? "Confirmer la commande →" : "تأكيد الطلبية وتثبيت الشراء ←"
               )}
             </button>
 
             <p className="text-center text-[11px] text-[#7a7368]">
-              💰 Aucun paiement en ligne — vous payez à la réception de votre commande.
+              💰 {lang === "fr" ? "Aucun paiement en ligne — vous payez à la réception de votre commande." : "لا يوجد دفع إلكتروني — ستقومين بالدفع نقدًا عند استلام طلبيتكِ من عون التوصيل."}
             </p>
           </form>
         </section>
@@ -269,7 +271,7 @@ export default function Commande() {
         {/* ── ORDER SUMMARY ── */}
         <aside className="animate-slide-right">
           <div className="sticky top-[100px] rounded-2xl bg-white p-6 shadow-sm border border-black/[0.03]">
-            <h2 className="font-serif text-xl uppercase tracking-[0.1em]">Votre commande</h2>
+            <h2 className="font-serif text-xl uppercase tracking-[0.1em]">{t("panier_titre")}</h2>
             <div className="mt-5 space-y-4 max-h-[360px] overflow-y-auto pr-1">
               {articles.map((article, i) => (
                 <div key={`${article.produitId}-${i}`} className="flex gap-4">
@@ -283,30 +285,30 @@ export default function Commande() {
                       <p className="text-sm font-medium text-[#080808] leading-snug">{article.nom}</p>
                       <p className="text-xs text-[#7a7368]">x{article.quantite} · {article.couleur}</p>
                     </div>
-                    <p className="text-sm font-semibold text-[#c9a84c]">{formatPrice(article.prix * article.quantite)}</p>
+                    <p className="text-sm font-semibold text-[#c9a84c]">{formatPrice(article.prix * article.quantite, lang)}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-              <div className="mt-5 space-y-2 border-t border-black/[0.05] pt-5 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-[#7a7368]">Sous-total</span>
-                  <span>{formatPrice(total)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#7a7368]">Livraison</span>
-                  <span className={livraisonOfferte ? "font-semibold text-[#c9a84c]" : "text-[#7a7368]"}>
-                    {livraisonOfferte ? "Offerte 🎁" : "À confirmer"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#7a7368]">Paiement</span>
-                  <span className="font-semibold text-[#c9a84c]">À la livraison 💰</span>
-                </div>
+            <div className="mt-5 space-y-2 border-t border-black/[0.05] pt-5 text-sm">
+              <div className="flex justify-between">
+                <span className="text-[#7a7368]">{t("sous_total")}</span>
+                <span>{formatPrice(total, lang)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#7a7368]">{t("livraison")}</span>
+                <span className={livraisonOfferte ? "font-semibold text-[#c9a84c]" : "text-[#7a7368]"}>
+                  {livraisonOfferte ? t("offert_shipping") : (lang === "fr" ? "À confirmer" : "يتم تحديده")}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#7a7368]">{t("etape_paiement")}</span>
+                <span className="font-semibold text-[#c9a84c]">{lang === "fr" ? "À la livraison 💰" : "عند الاستلام 💰"}</span>
+              </div>
               <div className="flex justify-between pt-3 border-t border-black/[0.05] text-base font-bold">
-                <span>Total</span>
-                <span className="text-[#c9a84c]">{formatPrice(total)}</span>
+                <span>{t("total")}</span>
+                <span className="text-[#c9a84c]">{formatPrice(total, lang)}</span>
               </div>
             </div>
           </div>

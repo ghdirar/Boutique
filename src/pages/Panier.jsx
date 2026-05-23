@@ -1,14 +1,17 @@
 import { Link } from "react-router-dom";
 import { usePanier } from "../context/PanierContext";
 import { useToast } from "../context/ToastContext";
+import { useLanguage } from "../context/LanguageContext";
 
-function formatPrice(value) {
-  return `${Number(value).toLocaleString("fr-FR")} DA`;
+function formatPrice(value, lang) {
+  return `${Number(value).toLocaleString("fr-FR")} ${lang === "ar" ? "د.ج" : "DA"}`;
 }
 
 export default function Panier() {
   const { articles, total, modifierQuantite, supprimerArticle } = usePanier();
   const { addToast } = useToast();
+  const { t, lang } = useLanguage();
+  
   const totalArticles = articles.reduce((acc, item) => acc + item.quantite, 0);
   const livraisonOfferte = totalArticles >= 3;
   const livraisonThreshold = 3;
@@ -17,7 +20,8 @@ export default function Panier() {
 
   const handleRemove = (index, nom) => {
     supprimerArticle(index);
-    addToast(`${nom} retiré du panier`, "🗑️");
+    const toastMsg = lang === "fr" ? `${nom} retiré du panier` : `تم حذف ${nom} من السلة`;
+    addToast(toastMsg, "🗑️");
   };
 
   if (articles.length === 0) {
@@ -25,13 +29,15 @@ export default function Panier() {
       <div className="flex min-h-[70vh] flex-col items-center justify-center bg-[#f7f4ef] px-5 py-20 text-center animate-page">
         <div className="mb-8 text-6xl">🛍️</div>
         <h1 className="font-serif text-3xl uppercase tracking-[0.1em] animate-fade-up">
-          Votre panier est vide
+          {t("panier_vide")}
         </h1>
         <p className="mt-4 text-sm text-[#7a7368] animate-fade-up delay-150">
-          Ajoutez une pièce depuis le catalogue pour commencer.
+          {lang === "fr"
+            ? "Ajoutez une pièce depuis le catalogue pour commencer."
+            : "أضيفي قطعة من الكتالوج للبدء بالتسوق."}
         </p>
         <Link to="/catalogue" className="btn-primary mt-8 animate-fade-up delay-300">
-          Découvrir le catalogue
+          {t("voir_catalogue")}
         </Link>
       </div>
     );
@@ -45,10 +51,10 @@ export default function Panier() {
         <section className="animate-slide-left">
           <div className="mb-8 flex items-center justify-between">
             <h1 className="font-serif text-3xl uppercase tracking-[0.1em]">
-              Panier <span className="text-[#c9a84c]">({articles.length})</span>
+              {t("panier_titre")} <span className="text-[#c9a84c]">({articles.length})</span>
             </h1>
             <Link to="/catalogue" className="text-sm text-[#7a7368] hover:text-[#080808] transition-colors">
-              ← Continuer les achats
+              {lang === "fr" ? "← Continuer les achats" : "← مواصلة التسوق"}
             </Link>
           </div>
 
@@ -74,14 +80,14 @@ export default function Panier() {
                         {article.couleur}{article.taille ? ` / ${article.taille}` : ""}
                       </p>
                     </div>
-                    <p className="font-semibold text-[#c9a84c] shrink-0">{formatPrice(article.prix * article.quantite)}</p>
+                    <p className="font-semibold text-[#c9a84c] shrink-0">{formatPrice(article.prix * article.quantite, lang)}</p>
                   </div>
                   <div className="flex items-center gap-4">
                     {/* Qty stepper */}
                     <div className="flex items-center overflow-hidden rounded-full border border-black/[0.07] bg-[#f7f4ef]">
                       <button
                         type="button"
-                        className="flex h-8 w-8 items-center justify-center text-sm font-bold text-[#080808] transition hover:bg-black/[0.05] disabled:opacity-30"
+                        className="flex h-8 w-8 items-center justify-center text-sm font-bold text-[#080808] transition hover:bg-black/[0.05] disabled:opacity-30 cursor-pointer"
                         onClick={() => modifierQuantite(index, article.quantite - 1)}
                         disabled={article.quantite <= 1}
                       >
@@ -90,7 +96,7 @@ export default function Panier() {
                       <span className="min-w-[32px] text-center text-sm font-semibold">{article.quantite}</span>
                       <button
                         type="button"
-                        className="flex h-8 w-8 items-center justify-center text-sm font-bold text-[#080808] transition hover:bg-black/[0.05]"
+                        className="flex h-8 w-8 items-center justify-center text-sm font-bold text-[#080808] transition hover:bg-black/[0.05] cursor-pointer"
                         onClick={() => modifierQuantite(index, article.quantite + 1)}
                       >
                         +
@@ -99,9 +105,9 @@ export default function Panier() {
                     <button
                       type="button"
                       onClick={() => handleRemove(index, article.nom)}
-                      className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#7a7368] transition hover:text-red-500"
+                      className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#7a7368] transition hover:text-red-500 cursor-pointer"
                     >
-                      Retirer
+                      {t("retirer")}
                     </button>
                   </div>
                 </div>
@@ -113,18 +119,18 @@ export default function Panier() {
         {/* ── ORDER SUMMARY ── */}
         <aside className="animate-slide-right">
           <div className="sticky top-[100px] rounded-2xl bg-white p-6 shadow-sm border border-black/[0.03]">
-            <h2 className="font-serif text-xl uppercase tracking-[0.1em] text-[#080808]">Récapitulatif</h2>
+            <h2 className="font-serif text-xl uppercase tracking-[0.1em] text-[#080808]">{t("recap_commande")}</h2>
 
             {/* Free shipping progress bar */}
             <div className="mt-5 rounded-xl bg-[#f7f4ef] p-4">
               {livraisonOfferte ? (
                 <div className="flex items-center gap-2 text-sm font-semibold text-[#c9a84c]">
-                  <span>✓</span> Livraison gratuite appliquée !
+                  <span>✓</span> {t("livraison_gratuite_alert")}
                 </div>
               ) : (
                 <div>
                   <p className="text-[12px] text-[#7a7368]">
-                    Plus que <span className="font-bold text-[#080808]">{remaining} {remaining > 1 ? "articles" : "article"}</span> pour la livraison gratuite
+                    {t("livraison_gratuite_progress", { n: remaining })}
                   </p>
                   <div className="mt-2 h-1.5 w-full rounded-full bg-[#ede9e0] overflow-hidden">
                     <div
@@ -139,29 +145,29 @@ export default function Panier() {
             {/* Totals */}
             <div className="mt-5 space-y-3 border-t border-black/[0.05] pt-5">
               <div className="flex justify-between text-sm">
-                <span className="text-[#7a7368]">Sous-total</span>
-                <span className="font-medium">{formatPrice(total)}</span>
+                <span className="text-[#7a7368]">{t("sous_total")}</span>
+                <span className="font-medium">{formatPrice(total, lang)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-[#7a7368]">Livraison</span>
+                <span className="text-[#7a7368]">{t("livraison")}</span>
                 <span className={livraisonOfferte ? "font-semibold text-[#c9a84c]" : "text-[#7a7368]"}>
-                  {livraisonOfferte ? "Offerte 🎁" : "À confirmer"}
+                  {livraisonOfferte ? t("offert_shipping") : (lang === "fr" ? "À confirmer" : "يتم تحديده")}
                 </span>
               </div>
               <div className="flex justify-between border-t border-black/[0.05] pt-4 text-base font-bold">
-                <span>Total</span>
-                <span className="text-[#c9a84c]">{formatPrice(total)}</span>
+                <span>{t("total")}</span>
+                <span className="text-[#c9a84c]">{formatPrice(total, lang)}</span>
               </div>
             </div>
 
             <Link to="/commande" className="btn-primary mt-6 w-full block text-center">
-              Commander →
+              {t("passer_commande")}
             </Link>
 
             {/* Trust */}
             <div className="mt-5 flex items-center justify-center gap-2 text-[11px] text-[#7a7368]">
               <span>💰</span>
-              <span>Paiement à la livraison — payez à la réception</span>
+              <span>{lang === "fr" ? "Paiement à la livraison — payez à la réception" : "الدفع عند الاستلام — ادفع نقدًا عند استلام طردكِ"}</span>
             </div>
           </div>
         </aside>

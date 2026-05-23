@@ -2,16 +2,12 @@ import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { usePanier } from "../context/PanierContext";
 import { useFavoris } from "../context/FavorisContext";
-
-const mainLinks = [
-  { to: "/catalogue", label: "Nouveautés" },
-  { to: "/catalogue?categorie=sacs-main", label: "Sac à la main" },
-  { to: "/catalogue", label: "Collections" },
-];
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Navbar() {
   const { nombreArticles } = usePanier();
   const { favoris } = useFavoris();
+  const { lang, toggleLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -53,11 +49,21 @@ export default function Navbar() {
     navigate(`/catalogue?q=${encodeURIComponent(searchQuery.trim())}`);
   };
 
+  const mainLinks = [
+    { to: "/catalogue", label: t("nouveautes") },
+    { to: "/catalogue?categorie=sacs-main", label: t("sacs_main") },
+    { to: "/catalogue", label: t("collections") },
+  ];
+
   return (
     <>
       {/* ── PROMO BANNER ── */}
       <div className="promo-banner">
-        <span>✨ Paiement à la livraison &nbsp;•&nbsp; Livraison partout en Algérie &nbsp;•&nbsp; 3 articles achetés = Livraison gratuite </span>
+        <span>
+          {lang === "fr"
+            ? "✨ Paiement à la livraison • Livraison partout en Algérie • 3 articles achetés = Livraison gratuite"
+            : "✨ الدفع عند الاستلام • شحن متوفر لكافة الولايات • شراء 3 حقائب = توصيل مجاني"}
+        </span>
       </div>
 
       {/* ── MAIN HEADER ── */}
@@ -92,12 +98,12 @@ export default function Navbar() {
               La Votre
             </p>
             <p className="text-[7px] sm:text-[8px] font-medium uppercase tracking-[0.25em] sm:tracking-[0.35em] text-[#c9a84c] mt-1 lg:mt-0.5" style={{ marginTop: "3px" }}>
-              Elle est déjà la vôtre
+              {t("slogan")}
             </p>
           </Link>
 
           {/* ── ACTIONS RIGHT ── */}
-          <div className="flex items-center justify-end gap-3 sm:gap-5">
+          <div className="flex items-center justify-end gap-2.5 sm:gap-4">
             {/* Search pill */}
             <button
               onClick={() => setIsSearchOpen(true)}
@@ -107,7 +113,7 @@ export default function Navbar() {
               <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" />
               </svg>
-              <span>Rechercher</span>
+              <span>{t("rechercher")}</span>
             </button>
 
             {/* Search mobile icon */}
@@ -119,6 +125,16 @@ export default function Navbar() {
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="7" /><path d="m16 16 4 4" />
               </svg>
+            </button>
+
+            {/* Language Switcher */}
+            <button
+              onClick={toggleLanguage}
+              className="flex h-9 items-center justify-center rounded-full border border-black/[0.06] bg-black/[0.01] px-3 text-[10px] font-bold tracking-[0.1em] hover:bg-black/[0.04] transition-all cursor-pointer text-[#080808] shrink-0"
+              style={{ minWidth: "44px" }}
+              title={lang === "fr" ? "Changer de langue" : "تغيير اللغة"}
+            >
+              {lang === "fr" ? "العربية" : "FR"}
             </button>
 
             {/* Favorites */}
@@ -184,7 +200,7 @@ export default function Navbar() {
               <input
                 autoFocus
                 type="text"
-                placeholder="Rechercher un article... (Entrée pour voir les résultats)"
+                placeholder={t("rechercher_placeholder")}
                 className="flex-1 bg-transparent text-base outline-none placeholder:text-[#a09a91]"
                 value={searchQuery}
                 onChange={handleSearchChange}
@@ -192,21 +208,17 @@ export default function Navbar() {
               />
               <button
                 onClick={handleSearchSubmit}
-                className="rounded-full bg-[#080808] px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-white transition hover:bg-[#c9a84c]"
+                className="rounded-full bg-[#080808] px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-white transition hover:bg-[#c9a84c] cursor-pointer"
               >
-                Chercher
+                {t("chercher")}
               </button>
               <button
                 onClick={() => setIsSearchOpen(false)}
-                className="rounded-full bg-black/[0.05] px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-[#080808] transition hover:bg-black/[0.08]"
+                className="rounded-full bg-black/[0.05] px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-[#080808] transition hover:bg-black/[0.08] cursor-pointer"
               >
                 ✕
               </button>
             </div>
-            {/* Quick hint */}
-            <p className="mx-auto mt-2 max-w-2xl pl-9 text-[11px] text-[#a09a91]">
-              Appuyez sur <kbd className="rounded bg-black/[0.06] px-1.5 py-0.5 font-mono text-[10px]">Entrée</kbd> pour voir tous les résultats
-            </p>
           </div>
         </div>
       )}
@@ -215,7 +227,7 @@ export default function Navbar() {
       {isMobileOpen && (
         <div className="fixed inset-0 z-[70] flex animate-fade-in lg:hidden">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsMobileOpen(false)} />
-          <div className="relative ml-auto h-full w-[300px] bg-white shadow-2xl flex flex-col animate-slide-right">
+          <div className={`relative ${lang === "ar" ? "mr-auto" : "ml-auto"} h-full w-[300px] bg-white shadow-2xl flex flex-col ${lang === "ar" ? "animate-slide-left" : "animate-slide-right"}`}>
             <div className="flex items-center justify-between px-6 py-5 border-b border-black/[0.04]">
               <p className="font-serif text-xl uppercase tracking-[0.18em]">La Votre</p>
               <button onClick={() => setIsMobileOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-black/[0.05]">
@@ -237,8 +249,12 @@ export default function Navbar() {
               ))}
             </nav>
             <div className="px-6 mt-auto pb-10 space-y-3">
-              <Link to="/favoris" onClick={() => setIsMobileOpen(false)} className="btn-secondary w-full block text-center">Mes Favoris ({favoris.length})</Link>
-              <Link to="/panier" onClick={() => setIsMobileOpen(false)} className="btn-primary w-full block text-center">Panier ({nombreArticles})</Link>
+              <Link to="/favoris" onClick={() => setIsMobileOpen(false)} className="btn-secondary w-full block text-center">
+                {t("mes_favoris")} ({favoris.length})
+              </Link>
+              <Link to="/panier" onClick={() => setIsMobileOpen(false)} className="btn-primary w-full block text-center">
+                {t("caddie")} ({nombreArticles})
+              </Link>
             </div>
           </div>
         </div>
