@@ -33,9 +33,7 @@ export default function Navbar() {
   }, [location.pathname, location.search]);
 
   const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    navigate(`/catalogue?q=${encodeURIComponent(value.trim())}`, { replace: true });
+    setSearchQuery(e.target.value);
   };
 
   // Close overlay + go to catalogue results on Enter
@@ -70,7 +68,7 @@ export default function Navbar() {
             : "bg-white/70 backdrop-blur-xl border-b border-black/[0.04]"
         }`}
       >
-        <div className="mx-auto grid h-[72px] max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center px-5 lg:px-10">
+        <div className="mx-auto flex h-[72px] max-w-[1400px] items-center justify-between px-5 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-10">
           {/* ── NAV LEFT ── */}
           <nav className="hidden items-center gap-8 lg:flex">
             {mainLinks.map((link) => (
@@ -89,11 +87,11 @@ export default function Navbar() {
           </nav>
 
           {/* ── LOGO ── */}
-          <Link to="/" className="text-center">
-            <p className="font-serif text-[26px] font-medium uppercase tracking-[0.22em] text-[#080808] sm:text-[30px]">
+          <Link to="/" className="text-left lg:text-center">
+            <p className="font-serif text-[20px] sm:text-[24px] lg:text-[30px] font-medium uppercase tracking-[0.22em] text-[#080808] leading-none">
               La Votre
             </p>
-            <p className="hidden text-[8px] font-medium uppercase tracking-[0.35em] text-[#c9a84c] sm:block" style={{ marginTop: "-2px" }}>
+            <p className="text-[7px] sm:text-[8px] font-medium uppercase tracking-[0.25em] sm:tracking-[0.35em] text-[#c9a84c] mt-1 lg:mt-0.5" style={{ marginTop: "3px" }}>
               Elle est déjà la vôtre
             </p>
           </Link>

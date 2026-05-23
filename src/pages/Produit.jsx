@@ -103,19 +103,69 @@ export default function Produit() {
   return (
     <div className="bg-white px-5 py-16 lg:px-10 animate-page">
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[55fr_45fr]">
-        <section className="animate-slide-left">
-          <div className="overflow-hidden bg-[#F5F5F3]">
-            <img src={mainImage || produit.imageUrl} alt={produit.nom} className="aspect-[4/5] w-full object-cover" />
+        <section className="animate-slide-left group">
+          {/* Main Animated Image Viewport */}
+          <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#F5F5F3] rounded-3xl shadow-[0_4px_30px_rgba(8,8,8,0.02)]">
+            {images.map((imgUrl, idx) => (
+              <img
+                key={imgUrl}
+                src={imgUrl}
+                alt={`${produit.nom} view ${idx + 1}`}
+                className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-in-out ${
+                  mainImage === imgUrl ? "opacity-100 scale-100 z-10" : "opacity-0 scale-[1.03] z-0 pointer-events-none"
+                }`}
+              />
+            ))}
+            
+            {/* Elegant Navigation Arrows (Fades in on Hover) */}
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentIdx = images.indexOf(mainImage);
+                    const prevIdx = (currentIdx - 1 + images.length) % images.length;
+                    setMainImage(images[prevIdx]);
+                  }}
+                  className="absolute left-5 top-1/2 z-20 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-[0_8px_32px_rgba(8,8,8,0.08)] text-[#080808] border border-black/[0.03] opacity-0 hover:bg-white hover:scale-105 transition-all duration-300 group-hover:opacity-100 cursor-pointer active:scale-95"
+                  aria-label="Image précédente"
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentIdx = images.indexOf(mainImage);
+                    const nextIdx = (currentIdx + 1) % images.length;
+                    setMainImage(images[nextIdx]);
+                  }}
+                  className="absolute right-5 top-1/2 z-20 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-[0_8px_32px_rgba(8,8,8,0.08)] text-[#080808] border border-black/[0.03] opacity-0 hover:bg-white hover:scale-105 transition-all duration-300 group-hover:opacity-100 cursor-pointer active:scale-95"
+                  aria-label="Image suivante"
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </>
+            )}
           </div>
-          <div className="mt-4 flex gap-3 flex-wrap">
-            {images.map((image) => (
+
+          {/* Thumbnails Gallery */}
+          <div className="mt-5 flex gap-3.5 flex-wrap">
+            {images.map((image, index) => (
               <button
                 key={image}
                 type="button"
                 onClick={() => setMainImage(image)}
-                className={`h-[90px] w-[70px] border transition-all duration-300 ${mainImage === image ? "border-[#1A1A1A] opacity-100" : "border-[#E8E8E8] opacity-75 hover:opacity-100"}`}
+                className={`h-[90px] w-[72px] rounded-xl overflow-hidden border-2 transition-all duration-300 cursor-pointer ${
+                  mainImage === image 
+                    ? "border-[#c9a84c] opacity-100 scale-102 shadow-[0_4px_12px_rgba(201,168,76,0.15)]" 
+                    : "border-black/[0.04] opacity-60 hover:opacity-100"
+                }`}
               >
-                <img src={image} alt={produit.nom} className="h-full w-full object-cover animate-fade-in" />
+                <img src={image} alt={`${produit.nom} thumbnail ${index + 1}`} className="h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
               </button>
             ))}
           </div>

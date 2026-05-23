@@ -27,10 +27,24 @@ const features = [
   { icon: "📞", title: "Support client", sub: "WhatsApp & Instagram" },
 ];
 
+const heroImages = [
+  "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=2400&q=85",
+  "https://images.unsplash.com/photo-1605733513597-a8f8d410fe3e?auto=format&fit=crop&w=2400&q=85",
+  "https://images.unsplash.com/photo-1598532163257-ae3c6b2524b6?auto=format&fit=crop&w=2400&q=85"
+];
+
 export default function Accueil() {
   const { produits, loading, error } = useProduits();
   const nouveautes = produits.slice(0, 4);
   const vedette = produits.slice(0, 4);
+  const [currentHero, setCurrentHero] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHero((prev) => (prev + 1) % heroImages.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="bg-[#f7f4ef]">
@@ -39,12 +53,17 @@ export default function Accueil() {
           HERO
       ══════════════════════════════════════════════════════ */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=2400&q=85"
-          alt="Nouvelle collection La Votre"
-          className="absolute inset-0 h-full w-full object-cover animate-pulse-slow"
-          style={{ transformOrigin: "center center" }}
-        />
+        {heroImages.map((src, index) => (
+          <img
+            key={src}
+            src={src}
+            alt={`Nouvelle collection La Votre ${index + 1}`}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1500 ease-in-out ${
+              index === currentHero ? "opacity-100 animate-pulse-slow" : "opacity-0"
+            }`}
+            style={{ transformOrigin: "center center" }}
+          />
+        ))}
         {/* Multi-layer overlay for depth */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/20" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
