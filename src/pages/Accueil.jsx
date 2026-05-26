@@ -6,14 +6,27 @@ import useProduits from "../hooks/useProduits";
 import { useLanguage } from "../context/LanguageContext";
 
 const heroImages = [
-  "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=2400&q=85",
-  "https://images.unsplash.com/photo-1605733513597-a8f8d410fe3e?auto=format&fit=crop&w=2400&q=85",
-  "https://images.unsplash.com/photo-1598532163257-ae3c6b2524b6?auto=format&fit=crop&w=2400&q=85",
+  // 1. Gros plan sac en cuir structuré beige/crème (Sac à la main)
   "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=2400&q=85",
+  
+  // 2. Sac à main structuré marron de luxe (Sac à la main)
+  "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=2400&q=85",
+  
+  // 3. Sac à main beige haut de gamme (Sac à la main)
+  "https://images.unsplash.com/photo-1598532163257-ae3c6b2524b6?auto=format&fit=crop&w=2400&q=85",
+  
+  // 4. Sac minimaliste noir élégant (Sac à la main)
+  "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=2400&q=85",
+  
+  // 5. Sac à main classique marron grainé (Sac à la main)
+  "https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=2400&q=85",
+  
+  // 6. Sac à main beige et or structuré (Sac à la main)
   "https://images.unsplash.com/photo-1547949003-9792a18a2601?auto=format&fit=crop&w=2400&q=85",
-  "https://images.unsplash.com/photo-1591561954557-26941169b49e?auto=format&fit=crop&w=2400&q=85"
+  
+  // 7. Sac à main bordeaux en cuir lisse (Sac à la main)
+  "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?auto=format&fit=crop&w=2400&q=85"
 ];
-
 export default function Accueil() {
   const { produits, loading, error } = useProduits();
   const { t, lang } = useLanguage();
